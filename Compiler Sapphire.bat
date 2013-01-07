@@ -1,0 +1,1 @@
+ocra Sapphire.rb --icon Sapphire.ico scite/** data/** Documentation.txt data/GUI/Cursor.png data/GUI/Close.png data/GUI/Dropdown.png data/GUI/Radio.png data/GUI/Check.png data/GUI/Zip.png

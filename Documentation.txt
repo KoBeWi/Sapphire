@@ -1,0 +1,228 @@
+Specjal commands:
+!scite - opens text editor
+!template - creates template for game
+  You can specify title by typing it after space
+
+
+Global variables:
+- FONT - name of the default font
+- $count - global frame counter
+- $game - actual state of game
+- $screen - window instance
+- $keys - hash with symbol-stored keyboard input
+- $enable_qui - set true to enable GUI
+- $GUI - used by GUI
+- $premusic - used by music prelude
+
+
+Files:
+-(Title).rb  // 1
+    Game's core, which loads scripts and has window's class
+    -Line 19: define resolution and fullscrinity
+    -Line 20: define window caption
+    -Line 22: define keys
+
+-specjal.rb  // 2,3,4,5,6
+    Major file with helper classes. Manages resources, buttons etc.
+    -Line +130: define entity groups
+
+-game.rb  // 7
+    File for main game's state. Manages entities etc.
+    -Line 26: set number of entity groups
+
+-utility&fx.rb  // 8,9,10,11,12,13,14
+    Tools for easy advanced entity control and classes taking care of simple effects, like particles etc.
+
+-GUI
+    Contains GUI module
+    -Line 2-8: define GUI colors
+
+
+Classes
+1.Main
+Window class responsible for updating and drawing game states and reading input.
+
+ def button_up(id)
+ Checks if specified key is released. Needs to be placed in state class to work
+
+2.Keypress
+Used for input checking, may use button from $keys
+
+  def Keypress.[](id,repeat)
+  id - Gosu::Button or symbol (located in $keys)
+  repeat - when false, key is triggered once until releasing it
+
+3.Img \ Snd
+Loads specified resoure and saves in memory for re-use
+
+  def .[](name,/tileable/,/pre/)
+  name - path to resource
+  tileable - used only for Img, true if image has to be tileable
+  pre - apply prelude to music. It will be played at the beginning and then the actual music is looped. Prelude must be separate file named '(music_name)-pre'
+  Images need to be .png , music and sound .ogg
+
+4.Tls
+Loads tiles from image
+
+  def Tls.[](name,width,height,tileable)
+  width/height - size per tile, lower than 0 splits image into width/height tiles
+
+5.Fnt
+Loads fonts
+
+  def Fnt.[](name,size)
+  name - path to font or name of .ttf file from system's fonts , if specified as Tls array, makes BitmapFont (see below)
+  size - height of the font or array with order of characters for BitmapFont (see below)
+
+6.BitmapFont
+Specjal class for custom fonts
+
+  NEW_LINE - this character will make new line in your text
+
+  def initialize(name,characters)
+  name - array of images (from Tls)
+  characters - array of characters as they are ordered in font's image, there's no difference in upcase or downcase chars
+
+  def draw(x,y,z,args)
+  args - hash arguments:
+    :scalex/scaley - scale of characters
+    :xspacing/yspacing - space between letters, defaulty is letter's size
+    :max - maximal width of text in one line
+    :align - :right or :center
+    :color - works best for greyscale images
+
+6.Entity
+Main class for game objects.
+
+  @stop - prevents entity update
+  @invisible - skips entity in drawing
+
+  def init(types)
+  Pushes entity to game's entity array, so it's being updated. Use types arrray for grouping entities for easier managing
+
+  def remove
+  Deletes entity from game's entity array and all group arrays
+
+  def gravity(width,height)
+  Method for simple falling physics
+  width/height - size of object
+
+7.Game
+Default class for handling game action. Manages in-game objects.
+
+  def solid?
+  Method to check if current coordinates are solid. Needs to be manually defined
+
+  def reset
+  Deletes all in-game entities
+
+8.Counter
+Objects used for countdowns
+
+  @finished - true if time reaches 0
+  @time - current time
+
+  def image(h,m,s,hs)
+  Returns string which converts time into hours, minutes, seconds and hundreth of seconds (use variables to specify display)
+
+9.Mover
+Basic object to move group of entities around (aside their own move)
+
+10.Flasher
+Toggles entities' @invisible variable to make them flash effect
+
+  def initialize(entities,time1,time2)
+  time1/time2 - how often variable is toggling
+
+11.Delayer
+Slows entities' update for certain ammount of frames
+
+12.Particle
+Simple falling object, may be use eg. for crashing glass
+
+  def initialize(x,y,z,img,vx,vy,args)
+  img - path to image or array for tile values
+  vx/vy - initial speed
+  args - hash arguments:
+    :angle - initial angle of image
+    :rotate - speed of image's rotating
+    :scalex/:scaley - objects scale
+    :color - color filter for image
+
+13.Trail
+Single animation sequence, which disappears after finishing
+
+  def initialize(x,y,z,tiles,sequence,time,args)
+  sequence - array of numbers, corresponding for frames in animation
+  time - length of each frame
+  args - :scalex, :scaley, :color
+
+14.Trace
+Alone image, which fades out particular time
+
+  def initialize(x,y,img,speed,args={})
+  speed - speed of fading
+  args - :angle,:scalex,:scaley,:color (MUST be Gosu::Color)
+
+
+How to use GUI
+-First you need to enable it, by calling  $enable_gui=true
+-Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::(ObjName).new
+-GUI graphics can be customized in data/GUI. Use only four colors from GUI palette for compatibility
+
+>Window
+-GUI::Window.new(x,y,width,height,title,customization)
+x,y - position of window
+width,height - window size
+title - window caption
+customization - array for options
+  example:
+  [[:separator,[10,10,50,50]] , [:object,[:button_1,Button.new(20,20,"Press me"]] , [:nox]]
+  
+  You can see 3 types of customization. Each customization is double array: name in symbol and then an array for opttions
+  -Layout
+  You can add texts and separators to your window.
+      :separator - [x1, y1, x2, y2]
+      :text - [text, x, y]
+      
+  -Objects
+  Add GUI elements. The first option for objects is its name referenced by window, second is new objects insance. They are listed below. Note that objects position is relative to window's
+  
+  -Additional options
+  Window settings, they take no arguments
+  :nox - window will have no X for closing
+  :disabled - window is invisible at start
+  :dock - window is unmovable
+  
+Windows can be closed and moved. You can only use actve window (the one with foreground border) and to activate window, just click its header, what will automatically move it to top
+Windows has also instance variables that can be changed anytime: @nox, @docked, @disabled
+You can also retrieve and set values of window's objects by Window.value(object name) and Window.set_value(objects name, value)
+
+>GUI Objects
+Every objects has its value accessor so values can be easily read and written
+They also have variable @disabled that makes it invisible
+
+Button - a bassic button. Read value to check if it's pressed
+Arguments: (x, y, text)
+
+Zip - a zip bar with numeric value
+Arguments: (x, y, max value, unit)
+-unit - distance between value
+
+Check - a simple checkbox
+Arguments: (x, y, negateable)
+-negateable - check normally takes true or nil, but negateable enables additionally false
+
+Radio - radio-type choice
+Arguments: (x, y, choices)
+-choices - it's an array of available selections
+
+Dropdown - dropdown-box-type choice
+Arguments: (x, y, choices)
+
+Textbox - a monospaced line of text input
+Arguments: (x, y, max)
+-max - maximal number of characters
+
+Number - numeric input
+Arguments: (x, y, minimal value, maximal value)
