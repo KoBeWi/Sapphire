@@ -34,7 +34,7 @@ class Main < Window
     $pressing[1].each{|key| $pressing[0] << key}
     $pressing[1].clear
     
-    (Msc[$premusic[1]].play(true) ; $premusic=nil) if $premusic and !$premusic[0].playing? and !$premusic[0].paused?
+    Msc[$premusic[1]].play(true) if $premusic and !$premusic[0].playing? and !$premusic[0].paused?
   end
 
   def draw

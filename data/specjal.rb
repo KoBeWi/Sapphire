@@ -68,7 +68,8 @@ class Msc
 			dir=((Dir.exists?(file="data/music/#{name.split('/')[0]}") or File.exists?(file+'.ogg')) ? '/music' : '')
       @@music[name.downcase] = Song.new($screen, "data#{dir}/#{name}.ogg")
     end
-    $premusic=[@@music[name.downcase],name.chomp('-pre')]
+    $premusic=nil
+    $premusic=[@@music[name.downcase],name.chomp('-pre')] if pre
     @@music[name.downcase]
   end
 
