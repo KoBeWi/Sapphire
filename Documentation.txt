@@ -215,10 +215,11 @@ Arguments: (x, y, negateable)
 
 Radio - radio-type choice
 Arguments: (x, y, choices)
--choices - it's an array of available selections
+-choices - it's an array of available selections ; it can be modified dynamically
 
 Dropdown - dropdown-box-type choice
 Arguments: (x, y, choices)
+-choices - it can be modified dynamically
 
 Textbox - a monospaced line of text input
 Arguments: (x, y, max)

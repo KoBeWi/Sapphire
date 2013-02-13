@@ -1,9 +1,9 @@
 module GUI
-  D_BCKG= 0xffbfbf00
-  L_BCKG= 0xff797900
-  D_FRGND= 0xff790000
-  L_FRGND= 0xffff0000
-  FONT_COLOR= 0xff0000ff
+  D_BCKG= 0xff808000
+  L_BCKG= 0xff008000
+  D_FRGND= 0xffc0c000
+  L_FRGND= 0xff00c000
+  FONT_COLOR= 0xff000000
   FONT= default_font_name
   FONT_SIZE= 16
 
@@ -11,7 +11,6 @@ module GUI
     attr_accessor :x,:y,:z,:disabled,:inactive
     def System.Init
       $GUI=[]
-      # $GUI=[[],[Img['GUI/Close'],Img['GUI/Zip'],Tls['GUI/Check',16,16],Tls['GUI/Radio',8,8],Tls['GUI/Dropdown',16,16],Fnt[default_font_name,16]],Img['GUI/Cursor']]
       4.times{|i|
       Img['GUI/Cursor'].clear(:color=>[D_BCKG,L_BCKG,D_FRGND,L_FRGND][i],:dest_select=>[[0]*3+[1],[0.25]*3+[1],[0.5]*3+[1],[0.75]*3+[1]][i],:tolerance=>0.1)
       Img['GUI/Close'].clear(:color=>[D_BCKG,L_BCKG,D_FRGND,L_FRGND][i],:dest_select=>[[0]*3+[1],[0.25]*3+[1],[0.5]*3+[1],[0.75]*3+[1]][i],:tolerance=>0.1)
@@ -233,11 +232,12 @@ module GUI
   end
 
   class Radio < System
+    attr_reader :choices
     def initialize(x,y,choices)
       @x,@y,@choices=x,y,choices
       @z=1
       @choice=0
-      @width=0
+      @width=16
       @height=@choices.length*FONT_SIZE+12
       @ys=[]
       img=Tls['GUI/Radio',-2,-1][0]
@@ -246,6 +246,9 @@ module GUI
     end
 
     def update
+      @choices.each{|ch| w=Fnt[FONT,FONT_SIZE].text_width(ch) ; @width=w+16+img.width if w+img.width>@width ; @ys << ((8+(i=@choices.index(ch)*FONT_SIZE))...(8+i+img.height)).to_a}
+      @last=@choices.length
+      
       img=Tls['GUI/Radio',-2,-1][0]
       if !@changing and Keypress[MsLeft] and $screen.mouse_x>@x+8 and $screen.mouse_x<@x+8+img.width and the_y=@ys.find{|y| y.include?($screen.mouse_y.to_i-@y)}
         @choice=@ys.index(the_y)
@@ -272,16 +275,21 @@ module GUI
   end
 
   class Dropdown < System
+    attr_reader :choices
     def initialize(x,y,choices)
       @x,@y,@choices=x,y,choices
       @z=1
       @value=@choice=0
-      @width=0
+      @width=16
       @choices.each{|ch| if (w=Fnt[FONT,FONT_SIZE].text_width(ch)+12)>@width then @width=w+12 end}
+      @last=@choices.length
       $GUI << self
     end
 
     def update
+      @choices.each{|ch| if (w=Fnt[FONT,FONT_SIZE].text_width(ch)+12)>@width then @width=w+12 end} if @last!=@choices.length
+      @last=@choices.length
+      
       img=Tls['GUI/Dropdown',-2,-2][0]
       if !@dropdown and !@clicking and Keypress[MsLeft] and $screen.mouse_x>@x+@width and $screen.mouse_x<@x+@width+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.height
         @dropdown=@clicking=true
@@ -325,7 +333,7 @@ module GUI
   end
 
   class Textbox < TextInput
-    attr_accessor :x,:y,:disabled,:choice
+    attr_accessor :x,:y,:disabled,:inactive
     def initialize(x,y,max)
       super()
       @x,@y,@max=x,y,max
@@ -335,12 +343,11 @@ module GUI
     end
 
     def update
+      $screen.text_input=nil if Keypress[MsLeft,false] and $screen.text_input==self
       if !@clicked and Keypress[MsLeft] and $screen.mouse_x>@x and $screen.mouse_x<@x+@width+4 and $screen.mouse_y>@y and $screen.mouse_y<@y+24
         $screen.text_input=self
         self.selection_start=[(($screen.mouse_x-@x)/Fnt[FONT,FONT_SIZE].text_width('G')).to_i,self.text.length].min
         @clicked=true
-      elsif !@clicked and Keypress[MsLeft]
-        $screen.text_input=nil
       elsif !Keypress[MsLeft]
         @clicked=nil
       end
