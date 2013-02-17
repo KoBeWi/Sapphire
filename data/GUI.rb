@@ -170,6 +170,7 @@ module GUI
   end
 
   class Zip < System
+    attr_reader :changed
     def initialize(x,y,max,unit=1)
       @x,@y,@max,@unit=x,y,max,unit
       @z=1
@@ -178,9 +179,12 @@ module GUI
     end
   
     def update
+      @changed=nil
       if Keypress[MsLeft] && $screen.mouse_x>@x && $screen.mouse_x<@x+@max*@unit && $screen.mouse_y>@y-Img['GUI/Zip'].height/2 && $screen.mouse_y<@y+Img['GUI/Zip'].height/2 or @changing
         @changing=true
+        value=@value
         @value=[[$screen.mouse_x-@x,0].max,@max*@unit].min.to_i/@unit
+        @changed=true if @value != value
         @changing=nil if !Keypress[MsLeft]
       end
     end
@@ -202,6 +206,7 @@ module GUI
   end
 
   class Check < System
+    attr_reader :changed
     def initialize(x,y,negateable=nil)
       @x,@y,@negateable=x,y,negateable
       @z=1
@@ -209,10 +214,11 @@ module GUI
     end
 
     def update
+      @changed=nil
       img=Tls['GUI/Check',-3,-1][0]
       if !@changing and Keypress[MsLeft] and $screen.mouse_x>@x and $screen.mouse_x<@x+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.width
         @value=@state=if @state==nil then true elsif @state==true and @negateable then false elsif @state=true && !@negateable or @state==false then nil end
-        @changing=true
+        @changing=@changed=true
       elsif !Keypress[MsLeft]
         @changing=nil
       end
@@ -232,7 +238,7 @@ module GUI
   end
 
   class Radio < System
-    attr_reader :choices
+    attr_reader :choices,:changed
     def initialize(x,y,choices)
       @x,@y,@choices=x,y,choices
       @z=1
@@ -246,12 +252,14 @@ module GUI
     end
 
     def update
+      @changed=nil
+      img=Tls['GUI/Radio',-2,-1][0]
       @choices.each{|ch| w=Fnt[FONT,FONT_SIZE].text_width(ch) ; @width=w+16+img.width if w+img.width>@width ; @ys << ((8+(i=@choices.index(ch)*FONT_SIZE))...(8+i+img.height)).to_a}
       @last=@choices.length
-      
-      img=Tls['GUI/Radio',-2,-1][0]
       if !@changing and Keypress[MsLeft] and $screen.mouse_x>@x+8 and $screen.mouse_x<@x+8+img.width and the_y=@ys.find{|y| y.include?($screen.mouse_y.to_i-@y)}
+        choice=@choice
         @choice=@ys.index(the_y)
+        @changed=true if @choice !=choice
         @changing=true
       elsif !Keypress[MsLeft]
         @changing=nil
@@ -268,6 +276,10 @@ module GUI
     def value
       @choice
     end
+    
+    def value2
+      @choices[@choice]
+    end
   
     def value=(val)
       @choice=val
@@ -275,11 +287,11 @@ module GUI
   end
 
   class Dropdown < System
-    attr_reader :choices
+    attr_reader :choices,:changed
     def initialize(x,y,choices)
       @x,@y,@choices=x,y,choices
       @z=1
-      @value=@choice=0
+      @choice=0
       @width=16
       @choices.each{|ch| if (w=Fnt[FONT,FONT_SIZE].text_width(ch)+12)>@width then @width=w+12 end}
       @last=@choices.length
@@ -287,6 +299,7 @@ module GUI
     end
 
     def update
+      @changed=nil
       @choices.each{|ch| if (w=Fnt[FONT,FONT_SIZE].text_width(ch)+12)>@width then @width=w+12 end} if @last!=@choices.length
       @last=@choices.length
       
@@ -294,7 +307,9 @@ module GUI
       if !@dropdown and !@clicking and Keypress[MsLeft] and $screen.mouse_x>@x+@width and $screen.mouse_x<@x+@width+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.height
         @dropdown=@clicking=true
       elsif @dropdown and !@clicking and Keypress[MsLeft] and @choosing
-        @value=@choice=@choosing
+        choice=@choice
+        @choice=@choosing
+        @changed=true if @choice !=choice
         @clicking=true
         @dropdown=nil
       elsif @dropdown and !@clicking and Keypress[MsLeft]
@@ -326,6 +341,10 @@ module GUI
     def value
       @choice
     end
+    
+    def value2
+      @choices[@choice]
+    end
   
     def value=(val)
       @choice=val
@@ -333,27 +352,30 @@ module GUI
   end
 
   class Textbox < TextInput
-    attr_accessor :x,:y,:disabled,:inactive
+    attr_accessor :x,:y,:disabled,:inactive,:changed
     def initialize(x,y,max)
       super()
       @x,@y,@max=x,y,max
       @z=1
-      @width=Fnt[FONT,FONT_SIZE].text_width('G'*max)+8
+      @width=Fnt[FONT,FONT_SIZE].text_width('m'*max)+8
       $GUI << self
     end
 
     def update
+      @changed=nil
+      text=value
       $screen.text_input=nil if Keypress[MsLeft,false] and $screen.text_input==self
       if !@clicked and Keypress[MsLeft] and $screen.mouse_x>@x and $screen.mouse_x<@x+@width+4 and $screen.mouse_y>@y and $screen.mouse_y<@y+24
         $screen.text_input=self
-        self.selection_start=[(($screen.mouse_x-@x)/Fnt[FONT,FONT_SIZE].text_width('G')).to_i,self.text.length].min
+        self.selection_start=[(($screen.mouse_x-@x)/Fnt[FONT,FONT_SIZE].text_width('m')).to_i,self.text.length].min
         @clicked=true
       elsif !Keypress[MsLeft]
         @clicked=nil
       end
       if @clicked and $screen.text_input==self
-        self.caret_pos=[[(($screen.mouse_x-@x)/Fnt[FONT,FONT_SIZE].text_width('G')).to_i,self.text.length].min,0].max
+        self.caret_pos=[[(($screen.mouse_x-@x)/Fnt[FONT,FONT_SIZE].text_width('m')).to_i,self.text.length].min,0].max
       end
+      @changed=true if $screen.text_input==self and value != text
     end
 
     def draw
@@ -362,10 +384,10 @@ module GUI
       self.caret_pos=self.selection_start=[caret,self.text.length].min if change
       $screen.draw_quad(@x,@y,c=D_BCKG,@x+@width+8,@y,c,@x+@width+8,@y+FONT_SIZE+10,c,@x,@y+FONT_SIZE+10,c,@z+0.2)
       $screen.draw_quad(@x+4,@y+4,c=L_BCKG,@x+@width+4,@y+4,c,@x+@width+4,@y+FONT_SIZE+6,c,@x+4,@y+FONT_SIZE+6,c,@z+0.2)
-      $screen.draw_quad(@x+4+Fnt[FONT,FONT_SIZE].text_width('G'*self.selection_start),@y+4,c=L_FRGND,@x+4+Fnt[FONT,FONT_SIZE].text_width('G'*self.caret_pos),@y+4,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('G'*self.caret_pos),@y+FONT_SIZE+6,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('G'*self.selection_start),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self
+      $screen.draw_quad(@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start),@y+4,c=L_FRGND,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+4,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+FONT_SIZE+6,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self
       x=0
-      self.text.each_char{|char| Fnt[FONT,FONT_SIZE].draw(char,@x+8+x*Fnt[FONT,FONT_SIZE].text_width("G"),@y+6,@z+0.2,1,1,FONT_COLOR) ; x+=1}
-      $screen.draw_line(@x+6+Fnt[FONT,FONT_SIZE].text_width('G'*self.caret_pos),@y+4,c=D_FRGND,@x+6+Fnt[FONT,FONT_SIZE].text_width('G'*self.caret_pos),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self and $count%60<30
+      self.text.each_char{|char| Fnt[FONT,FONT_SIZE].draw(char,@x+8+x*Fnt[FONT,FONT_SIZE].text_width("m"),@y+6,@z+0.2,1,1,FONT_COLOR) ; x+=1}
+      $screen.draw_line(@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+4,c=D_FRGND,@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self and $count%60<30
     end
     
     def value
@@ -378,26 +400,33 @@ module GUI
   end
 
   class Number < System
+    attr_reader :value,:changed
+    attr_accessor :min,:max
     def initialize(x,y,min,max)
       @x,@y,@min,@max=x,y,min,max
       @z=1
-      @value=0
+      @value=@min
       @wait=0
       @width=Fnt[FONT,FONT_SIZE].text_width('9'*([@min.to_s.length,@max.to_s.length].max+1))+4
       $GUI << self
     end
   
     def update
+      @changed=nil
       img=Tls['GUI/Dropdown',-2,-2][0]
       cnd=($screen.mouse_x>@x+@width and $screen.mouse_x<@x+@width+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.height)
       @wait-=1
       if !@clicked and Keypress[MsLeft] and cnd
         @clicked=($screen.mouse_y<@y+img.height/2 ? :up : :down)
+        value=@value
         @value=[[@value+(@clicked==:up ? 1 : -1),@min].max,@max].min
+        @changed=true if @value !=value
         @wait=30
       elsif Keypress[MsLeft] and cnd and @wait<0
         ch=if @wait<-210 then 1000 elsif @wait<-150 then 100 elsif @wait<-90 then 10 else 1 end
+        value=@value
         @value=[[@value+(@clicked==:up ? ch : -ch),@min].max,@max].min
+        @changed=true if @value !=value
       elsif !Keypress[MsLeft]
         @clicked=nil
       end

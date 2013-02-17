@@ -199,8 +199,9 @@ Windows has also instance variables that can be changed anytime: @nox, @docked, 
 You can also retrieve and set values of window's objects by Window.value(object name) and Window.set_value(objects name, value)
 
 >GUI Objects
-Every objects has its value accessor so values can be easily read and written
-They also have variable @disabled that makes it invisible
+Every objects has its  :value  accessor so values can be easily read and written
+They have a   :changed   reader, that returns true if value was changed last frame
+They also have a variable  @disabled  that makes them invisible
 
 Button - a bassic button. Read value to check if it's pressed
 Arguments: (x, y, text)
@@ -227,3 +228,6 @@ Arguments: (x, y, max)
 
 Number - numeric input
 Arguments: (x, y, minimal value, maximal value)
+min and max can be modified dynamically
+
+Radio and Dropdown have a   value2   method that returns currently selected text rather than choice id
