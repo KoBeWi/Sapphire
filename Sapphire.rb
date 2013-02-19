@@ -8,8 +8,8 @@ puts "Ruby 1.9.2"
 require 'gosu'
 include Gosu
 puts "Gosu #{Gosu::VERSION}"
-# require 'ashton'
-# puts "Ahston 0.0.1alpha"
+require 'ashton'
+puts "Ashton 0.0.3alpha"
 require 'texplay'
 puts "Texplay #{TexPlay::VERSION}"
 require 'gl'

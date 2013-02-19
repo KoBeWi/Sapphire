@@ -6,12 +6,11 @@ require 'glu'
 include Gl
 include Glu
 
-scr="#{Dir.getwd}/data/scripts/"
-require scr+'specjal.rb'
-require scr+'gui.rb'
-require scr+'utility&fx.rb'
-require scr+'game.rb'
-require scr+'objects.rb'
+require_relative 'specjal.rb'
+require_relative 'gui.rb'
+require_relative 'utility&fx.rb'
+require_relative 'game.rb'
+require_relative 'objects.rb'
 FONT=default_font_name
 
 class Main < Window
