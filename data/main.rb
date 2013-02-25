@@ -6,11 +6,11 @@ require 'glu'
 include Gl
 include Glu
 
-require_relative 'specjal.rb'
-require_relative 'gui.rb'
-require_relative 'utility&fx.rb'
-require_relative 'game.rb'
-require_relative 'objects.rb'
+require_relative 'data/scripts/specjal.rb'
+require_relative 'data/scripts/gui.rb'
+require_relative 'data/scripts/utility&fx.rb'
+require_relative 'data/scripts/game.rb'
+require_relative 'data/scripts/objects.rb'
 FONT=default_font_name
 
 class Main < Window
