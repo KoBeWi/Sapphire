@@ -83,10 +83,10 @@ class Fnt
     @@fonts = Hash.new unless defined?(@@fonts)
 		if name.class==Array
       name[0].downcase!
-			if @@fonts[name.downcase]
-				@@fonts[name.downcase]
+			if @@fonts[name]
+				@@fonts[name]
 			else
-				@@fonts[name.downcase] = BitmapFont.new(name,size)
+				@@fonts[name] = BitmapFont.new(name,size)
 			end
 		else
 			if @@fonts[[name.downcase,size]]
