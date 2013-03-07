@@ -58,7 +58,7 @@ Loads specified resoure and saves in memory for re-use
   def .[](name,/tileable/,/pre/)
   name - path to resource
   tileable - used only for Img, true if image has to be tileable
-  pre - apply prelude to music. It will be played at the beginning and then the actual music is looped. Prelude must be separate file named '(music_name)-pre'
+  pre - apply prelude to music. It will be played at the beginning and then the actual music is looped. Prelude must be separate file named '(music_name)-pre'. Using :auto will seek automatically if there's prelude available
   Images need to be .png , music and sound .ogg
 
 4.Tls
@@ -78,6 +78,7 @@ Loads fonts
 Specjal class for custom fonts
 
   NEW_LINE - this character will make new line in your text
+  DFACTOR - float, define size of downcase letters (e.g. 0.5 will make them 2x smaller than upcase)
 
   def initialize(name,characters)
   name - array of images (from Tls)

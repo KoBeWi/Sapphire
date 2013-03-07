@@ -63,6 +63,10 @@ end
 class Msc
   def Msc.[](name,pre=nil)
     @@music = Hash.new unless defined?(@@music)
+    if pre==:auto
+			dir=((Dir.exists?(file="data/music/#{name.split('/')[0]}") or File.exists?(file+'.ogg')) ? '/music' : '')
+      pre=File.exists?("data#{dir}/#{name}-pre.ogg")
+    end
     name+='-pre' if pre
     if !@@music[name.downcase]
 			dir=((Dir.exists?(file="data/music/#{name.split('/')[0]}") or File.exists?(file+'.ogg')) ? '/music' : '')
@@ -104,6 +108,7 @@ end
 
 class BitmapFont
 	NEW_LINE='^'
+  DFACTOR=1
 	def initialize(images,characters)
 		@images,@characters=images,characters
 	end
@@ -119,9 +124,35 @@ class BitmapFont
 		
     text=text.to_s
 		text.each_char{|char| index=@characters.index(char.upcase)
-		Tls[*@images][index].draw(x+posx-(align==:right ? (text.length*xspacing) : align==:center ? (text.length*xspacing)/2 : 0),y+posy,z,scalex,scaley,args[:color] ? args[:color] : 0xffffffff)
+    scalex1=(char.upcase==char ? scalex : scalex*DFACTOR)
+    scaley1=(char.upcase==char ? scaley : scaley*DFACTOR)
+		Tls[*@images][index].draw(x+posx-(align==:right ? (text.length*xspacing) : align==:center ? (text.length*xspacing)/2 : 0),y+posy+(scaley1 != scaley ? yspacing*(1-DFACTOR) : 1),z,scalex1,scaley1,args[:color] ? args[:color] : 0xffffffff) if index
 		posx+=xspacing
-		(posy+=yspacing ; posx=0) if @characters[index]==NEW_LINE or max && posx+xspacing>max}
+		(posy+=yspacing ; posx=0) if char==NEW_LINE or max && posx+xspacing>max}
+	end
+end
+
+class Entity
+	attr_accessor :x,:y,:stop,:invisible
+	def init(*types)
+		$game.entities[0] << self
+    $game.entities[1] << self if types.include?(:tile)
+	end
+
+	def remove
+		$game.entities.each{|e| if e.class==Array
+			e.delete(self) end}
+		$game.entities.delete(self)
+	end
+
+	def gravity(width,height=width)
+		@vy=0 if !@vy
+		@vy+=1
+		if @vy.to_i>0
+			@vy.to_i.times{if !$game.solid?(@x,@y+height,true) and !$game.solid?(@x+width,@y+height,true) ; @y+=1 else @vy=0 end}
+		elsif @vy.to_i<0
+			(-@vy).to_i.times{if !$game.solid?(@x,@y,true) and !$game.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
+		end
 	end
 end
 
