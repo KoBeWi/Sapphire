@@ -96,7 +96,7 @@ class Trail < Entity
 	end
 
 	def update
-    (@delay=Timer.new(@time) ; @entities.each{|ent| ent.stop=true}) if !@delay
+    @delay||=Timer.new(@time)
     if @delay.finished
       remove if (@frame+=1)==@sequence.length
       @delay=nil
@@ -109,23 +109,23 @@ class Trail < Entity
 end
 
 class Trace < Entity
-	def initialize(x,y,img,speed,args={})
-		@x,@y,@img,@speed,@args=x,y,img,speed,args
-		@color=if args[:color] then args[:color] else Color.new(0xffffffff) end
+	def initialize(x,y,z,img,speed,args={})
+		@x,@y,@z,@img,@speed,@args=x,y,z,img,speed,args
+		@color=(args[:color] ? args[:color] : Color.new(0xffffffff))
 		init
 	end
 
-	def update(sx,sy)
+	def update
 		@color.alpha=[@color.alpha-@speed,0].max
 		remove if @color.alpha==0
 	end
 
-	def draw(sx,sy)
+	def draw
     img=(@img.class == Array ? Tls[@img[0], @img[1], @img[2]][@img[3]] : Img[@img])
     if @args[:angle]
-      img.draw_rot(@x,@y,@z,@args[:angle],0.5,0.5,@args[:scalex] ? @args[:scalex] : 1,@args[:scaley] ? @args[:scaley] : 1,@args[:color] ? @args[:color] : 0xffffffff)
+      img.draw_rot(@x,@y,@z,@args[:angle],0.5,0.5,@args[:scalex] ? @args[:scalex] : 1,@args[:scaley] ? @args[:scaley] : 1,@color)
     else
-      img.draw(@x,@y,@z,@args[:scalex] ? @args[:scalex] : 1,@args[:scaley] ? @args[:scaley] : 1,@args[:color] ? @args[:color] : 0xffffffff)
+      img.draw(@x,@y,@z,@args[:scalex] ? @args[:scalex] : 1,@args[:scaley] ? @args[:scaley] : 1,@color)
     end
 	end
 end
