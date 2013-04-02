@@ -145,36 +145,12 @@ class Entity
 		$game.entities.delete(self)
 	end
 
-	def gravity(width,height=width)
-		@vy=0 if !@vy
-		@vy+=1
-		if @vy.to_i>0
+	def gravity(width,height=width,gravity=1)
+		@vy||=0
+		@vy+=gravity
+		if @vy>0
 			@vy.to_i.times{if !$game.solid?(@x,@y+height,true) and !$game.solid?(@x+width,@y+height,true) ; @y+=1 else @vy=0 end}
-		elsif @vy.to_i<0
-			(-@vy).to_i.times{if !$game.solid?(@x,@y,true) and !$game.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
-		end
-	end
-end
-
-class Entity
-	attr_accessor :x,:y,:stop,:invisible
-	def init(*types)
-		$game.entities[0] << self
-    $game.entities[1] << self if types.include?(:tile)
-	end
-
-	def remove
-		$game.entities.each{|e| if e.class==Array
-			e.delete(self) end}
-		$game.entities.delete(self)
-	end
-
-	def gravity(width,height=width)
-		@vy=0 if !@vy
-		@vy+=1
-		if @vy.to_i>0
-			@vy.to_i.times{if !$game.solid?(@x,@y+height,true) and !$game.solid?(@x+width,@y+height,true) ; @y+=1 else @vy=0 end}
-		elsif @vy.to_i<0
+		elsif @vy<0
 			(-@vy).to_i.times{if !$game.solid?(@x,@y,true) and !$game.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
 		end
 	end
