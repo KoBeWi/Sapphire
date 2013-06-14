@@ -15,7 +15,7 @@ class Timer < Entity
   def image(h=true,m=true,s=true,hs=true)
     txt=[]
     txt << "#{'0' if (t=(@time/216000%60).to_i)<10}#{t}" if h
-    txt << "#{'0' if (t=(@time/36000%60).to_i)<10}#{t}" if m
+    txt << "#{'0' if (t=(@time/3600%60).to_i)<10}#{t}" if m
     txt << "#{'0' if (t=(@time/60%60).to_i)<10}#{t}" if s
     txt << "#{'0' if (@time/0.6)%100<10}#{((@time/0.6)%100).to_i}" if hs
     txt.join(':')
@@ -69,6 +69,7 @@ class Particle < Entity
 	def initialize(x,y,z,img,vx,vy,args={})
 		@x,@y,@z,@img,@args=x,y,z,img,args
 		@vx=vx ; @vy=vy
+    @args[:angle]=0 if @args[:rotate] and !@args[:angle]
 		init
 	end
 	

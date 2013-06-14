@@ -1,5 +1,6 @@
 require 'gosu'
 include Gosu
+#remove some of these if you don't use EXE don't want/can't use them
 require 'texplay'
 require 'gl'
 require 'glu'
@@ -7,25 +8,27 @@ include Gl
 include Glu
 
 require_relative 'data/scripts/specjal.rb'
-require_relative 'data/scripts/gui.rb'
+require_relative 'data/scripts/gui.rb' #remove this if you don't use TexPlay
 require_relative 'data/scripts/utility&fx.rb'
 require_relative 'data/scripts/game.rb'
 require_relative 'data/scripts/objects.rb'
-FONT=default_font_name
+#here come additional scripts (like above)
+
+FONT=default_font_name #default font, remove if you won't use it
 
 class Main < Window
   def initialize(fullscreen=false)
-    super(640, 480, fullscreen)
-    self.caption="Title"
-    $count=0
-    $keys={:left=>KbLeft, :right=>KbRight, :jump=>KbSpace}
+    super(640, 480, fullscreen) #set resolution and fullscreen mode
+    self.caption="Title" #set caption
+    $time=0
+    $keys={:left=>KbLeft, :right=>KbRight, :jump=>KbSpace} #define input to use with Keypress[] method
     $pressing=[[],[],[]]
   end
 
   def update
     GUI::System.Update if $enable_gui
     $game.update
-    $count+=1
+    $time+=1
     
     $pressing[0].each{|key| $pressing[2] << key if !button_down?(key)}
     $pressing[2].each{|key| $pressing[0].delete(key)}

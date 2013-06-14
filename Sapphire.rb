@@ -12,11 +12,9 @@ require 'ashton'
 puts "Ashton 0.0.3alpha"
 require 'texplay'
 puts "Texplay #{TexPlay::VERSION}"
-require 'gl'
-require 'glu'
 include Gl
 include Glu
-puts "Ruby-OpenGL 0.60.1"
+puts "Opengl-0.8.0.pre1"
 require 'fileutils'
 
 class Code_Requiristier

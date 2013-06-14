@@ -1,11 +1,12 @@
 module GUI
+  #define color(may be Gosu::Color not hex)
   D_BCKG= 0xff808000
   L_BCKG= 0xff008000
   D_FRGND= 0xffc0c000
   L_FRGND= 0xff00c000
   FONT_COLOR= 0xff000000
-  FONT= default_font_name
-  FONT_SIZE= 16
+  FONT= 'Courier' #set font for GUI (monospaced is recommended since it affects GUI width)
+  FONT_SIZE= 16 #size of font
 
   class System
     attr_accessor :x,:y,:z,:disabled,:inactive
@@ -48,6 +49,10 @@ module GUI
     def System.Stick?
       @@stick||=nil
       @@stick!=nil
+    end
+    
+    def System.Clear
+      $GUI.clear
     end
   end
   
@@ -216,7 +221,7 @@ module GUI
     def update
       @changed=nil
       img=Tls['GUI/Check',-3,-1][0]
-      if !@changing and Keypress[MsLeft] and $screen.mouse_x>@x and $screen.mouse_x<@x+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.width
+      if !@changing and Keypress[MsLeft,false] and $screen.mouse_x>@x and $screen.mouse_x<@x+img.width and $screen.mouse_y>@y and $screen.mouse_y<@y+img.width
         @value=@state=if @state==nil then true elsif @state==true and @negateable then false elsif @state=true && !@negateable or @state==false then nil end
         @changing=@changed=true
       elsif !Keypress[MsLeft]

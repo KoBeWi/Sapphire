@@ -107,8 +107,8 @@ class Fnt
 end
 
 class BitmapFont
-	NEW_LINE='^'
-  DFACTOR=1
+	NEW_LINE='^' #this character will make new line
+  DFACTOR=1 #scale of downcase characters
 	def initialize(images,characters)
 		@images,@characters=images,characters
 	end
@@ -120,7 +120,7 @@ class BitmapFont
 		xspacing=(args[:xspacing] ? args[:xspacing] : @images[1]*scalex)
 		yspacing=(args[:yspacing] ? args[:yspacing] : @images[1]*scaley)
 		max=args[:max]
-		align=args[:align] ##calculate line
+		align=args[:align] ##multiline align unsupported
 		
     text=text.to_s
 		text.each_char{|char| index=@characters.index(char.upcase)
@@ -133,16 +133,16 @@ class BitmapFont
 end
 
 class Entity
-	attr_accessor :x,:y,:stop,:invisible
+	attr_accessor :x,:y,:stop,:invisible,:removed
 	def init(*types)
 		$game.entities[0] << self
     $game.entities[1] << self if types.include?(:tile)
+    #define additional groups like above
 	end
 
 	def remove
-		$game.entities.each{|e| if e.class==Array
-			e.delete(self) end}
-		$game.entities.delete(self)
+    $game.remove(self)
+    @removed=true
 	end
 
 	def gravity(width,height=width,gravity=1)
@@ -154,4 +154,9 @@ class Entity
 			(-@vy).to_i.times{if !$game.solid?(@x,@y,true) and !$game.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
 		end
 	end
+end
+
+def Stop_Music
+  Song.current_song.stop if Song.current_song
+  $premusic=nil
 end

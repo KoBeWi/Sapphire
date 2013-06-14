@@ -3,50 +3,51 @@ Specjal commands:
 !template - creates template for game
   You can specify title by typing it after space
 
+Template is an empty game project with useful classes to help developing.
+
+
+
+Template documentation:
 
 Global variables:
 - FONT - name of the default font
-- $count - global frame counter
+- $time- global frame counter
 - $game - actual state of game
 - $screen - window instance
 - $keys - hash with symbol-stored keyboard input
-- $enable_qui - set true to enable GUI
+- $enable_gui - set true to enable GUI
 - $GUI - used by GUI
 - $premusic - used by music prelude
+- $preessing - used by input
 
 
-Files:
+Code files: (number is for class index below)
 -(Title).rb  // 1
     Game's core, which loads scripts and has window's class
-    -Line 19: define resolution and fullscrinity
-    -Line 20: define window caption
-    -Line 22: define keys
 
 -specjal.rb  // 2,3,4,5,6
     Major file with helper classes. Manages resources, buttons etc.
-    -Line +130: define entity groups
+    Stop_Music - method that stops any song playing
 
 -game.rb  // 7
     File for main game's state. Manages entities etc.
-    -Line 26: set number of entity groups
 
 -utility&fx.rb  // 8,9,10,11,12,13,14
     Tools for easy advanced entity control and classes taking care of simple effects, like particles etc.
 
 -GUI
     Contains GUI module
-    -Line 2-8: define GUI colors
 
 
-Classes
+Classe index (note that there are only some explanations, open files to see constructors etc. Some of them share similar methods so they are not descibed)
 1.Main
 Window class responsible for updating and drawing game states and reading input.
 
- def button_up(id)
- Checks if specified key is released. Needs to be placed in state class to work
+ def button_down/up(id)
+ Checks if specified key is pressed/released. Needs to be placed in state class to work
 
 2.Keypress
-Used for input checking, may use button from $keys
+Used for input checking, may use buttons from $keys
 
   def Keypress.[](id,repeat)
   id - Gosu::Button or symbol (located in $keys)
@@ -71,42 +72,40 @@ Loads tiles from image
 Loads fonts
 
   def Fnt.[](name,size)
-  name - path to font or name of .ttf file from system's fonts , if specified as Tls array, makes BitmapFont (see below)
+  name - path to font or name of .ttf file from system's fonts. if specified as Tls array, makes a BitmapFont (see below)
   size - height of the font or array with order of characters for BitmapFont (see below)
 
 6.BitmapFont
 Specjal class for custom fonts
 
-  NEW_LINE - this character will make new line in your text
-  DFACTOR - float, define size of downcase letters (e.g. 0.5 will make them 2x smaller than upcase)
-
   def initialize(name,characters)
-  name - array of images (from Tls)
-  characters - array of characters as they are ordered in font's image, there's no difference in upcase or downcase chars
+  name - array of images (use Tls method here)
+  characters - array of characters as they are ordered in font's image. There's no difference in upcase or downcase chars
 
   def draw(x,y,z,args)
   args - hash arguments:
     :scalex/scaley - scale of characters
-    :xspacing/yspacing - space between letters, defaulty is letter's size
+    :xspacing/yspacing - space between letters, defaultly is letter's size
     :max - maximal width of text in one line
-    :align - :right or :center
-    :color - works best for greyscale images
+    :align - :right or :center, no support for multiline text (yet?)
+    :color - works best for greyscale images. Gosu::Color or hex 0xaarrggbb
 
 6.Entity
 Main class for game objects.
 
-  @stop - prevents entity update
-  @invisible - skips entity in drawing
+  @stop (accessor) - prevents entity update
+  @invisible (accessor) - skips entity in drawing
+  @removed (reader) - entity was removed (see below)
 
   def init(types)
   Pushes entity to game's entity array, so it's being updated. Use types arrray for grouping entities for easier managing
 
   def remove
-  Deletes entity from game's entity array and all group arrays
+  Deletes entity from game's entity array and all group arrays. Note that entity will vanish at the end of update cycle. Calling this sets @removed variatble to true on first
 
-  def gravity(width,height)
+  def gravity(width,height,gravity)
   Method for simple falling physics
-  width/height - size of object
+  width/height - size of object. When no height is give, it will take width value
 
 7.Game
 Default class for handling game action. Manages in-game objects.
@@ -116,18 +115,27 @@ Default class for handling game action. Manages in-game objects.
 
   def reset
   Deletes all in-game entities
+  
+  def missing?(entity)
+  Checks if entity is removed
+  
+  def find(block)
+  Searchs entitiy passing specified block
+  
+  def find2(group,block)
+  Searchs entitiy in given grouo passing specified block
 
 8.Counter
-Objects used for countdowns
+Object used for countdowns
 
-  @finished - true if time reaches 0
+  @finished (reader) - true if time reaches 0
   @time - current time
 
   def image(h,m,s,hs)
   Returns string which converts time into hours, minutes, seconds and hundreth of seconds (use variables to specify display)
 
 9.Mover
-Basic object to move group of entities around (aside their own move)
+Basic object to move group of entities together
 
 10.Flasher
 Toggles entities' @invisible variable to make them flash effect
@@ -136,16 +144,16 @@ Toggles entities' @invisible variable to make them flash effect
   time1/time2 - how often variable is toggling
 
 11.Delayer
-Slows entities' update for certain ammount of frames
+Slows entities' update for certain ammount of frames (see: Flasher)
 
 12.Particle
 Simple falling object, may be use eg. for crashing glass
 
   def initialize(x,y,z,img,vx,vy,args)
-  img - path to image or array for tile values
+  img - path to image or array for tile values (["imagename",w,h] instead of Tls method)
   vx/vy - initial speed
   args - hash arguments:
-    :angle - initial angle of image
+    :angle - initial angle of image (default: 0)
     :rotate - speed of image's rotating
     :scalex/:scaley - objects scale
     :color - color filter for image
@@ -154,15 +162,16 @@ Simple falling object, may be use eg. for crashing glass
 Single animation sequence, which disappears after finishing
 
   def initialize(x,y,z,tiles,sequence,time,args)
+  tiles - not Tls, but simple array (see: Particle)
   sequence - array of numbers, corresponding for frames in animation
-  time - length of each frame
+  time - frame length of each frame
   args - :scalex, :scaley, :color
 
 14.Trace
-Alone image, which fades out particular time
+Single image, which fades out particular time
 
   def initialize(x,y,img,speed,args={})
-  speed - speed of fading
+  speed - speed of fading (max 255)
   args - :angle,:scalex,:scaley,:color (MUST be Gosu::Color)
 
 
@@ -180,7 +189,7 @@ customization - array for options
   example:
   [[:separator,[10,10,50,50]] , [:object,[:button_1,Button.new(20,20,"Press me"]] , [:nox]]
   
-  You can see 3 types of customization. Each customization is double array: name in symbol and then an array for opttions
+  Above you can see 3 types of customization. Each customization is double array: name in symbol and then an array for options.
   -Layout
   You can add texts and separators to your window.
       :separator - [x1, y1, x2, y2]
@@ -209,7 +218,7 @@ Arguments: (x, y, text)
 
 Zip - a zip bar with numeric value
 Arguments: (x, y, max value, unit)
--unit - distance between value
+-unit - pixel distance between values
 
 Check - a simple checkbox
 Arguments: (x, y, negateable)
