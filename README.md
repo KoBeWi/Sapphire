@@ -1,15 +1,16 @@
-Sapphire (source version)
+Sapphire (source version) 
+
 The 'source' includes:
--source code (with Template files)
--exe
--icon file
--batch compiler for Windows/Ocra (pretty useless)
--SciTe (Windows)
--this file
+- source code (with Template files)
+- exe
+- icon file
+- batch compiler for Windows/Ocra (pretty useless)
+- SciTe (Windows)
+- this file
 
 Sapphire is:
--stand-alone Ruby for Windows, including gems for making games
--template maker to start developing games with Ruby/Gosu easier
+- stand-alone Ruby for Windows, including gems for making games
+- template maker to start developing games with Ruby/Gosu easier
 
 
 If you are Windows, you can use the exe. If not, you need Ruby and run/compile Sapphire.rb to have same functionality.
@@ -38,20 +39,20 @@ Global variables used:
 
 
 Code files: (number is for class index below)
--(Title).rb  // 1
+- (Title).rb  // 1
     Game's core, which loads scripts and has window's class
 
--specjal.rb  // 2,3,4,5,6
+- specjal.rb  // 2,3,4,5,6
     Major file with helper classes. Manages resources, buttons etc.
     Stop_Music - method that stops any song playing
 
--game.rb  // 7
+- game.rb  // 7
     File for main game's state. Manages entities etc.
 
--utility&fx.rb  // 8,9,10,11,12,13,14,15
+- utility&fx.rb  // 8,9,10,11,12,13,14,15
     Tools for easy advanced entity control and classes taking care of simple effects, like particles etc.
 
--GUI
+- GUI
     Contains GUI module
 
 
@@ -216,9 +217,9 @@ Used for reading key sequences
 
 
 How to use GUI
--First you need to enable it, by calling  $enable_gui=true
--Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::ObjName.new
--GUI graphics can be customized in data/GUI. Use only four colors from GUI palette for compatibility
+- First you need to enable it, by calling  $enable_gui=true
+- Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::ObjName.new
+- GUI graphics can be customized in data/GUI. Use only four colors from GUI palette for compatibility
 
 >Window
 -GUI::Window.new(x,y,width,height,title,customization)
@@ -230,15 +231,15 @@ customization - array for options
   [[:separator,[10,10,50,50]] , [:object,[:button_1,Button.new(20,20,"Press me"]] , [:nox]]
   
   Above you can see 3 types of customization. Each customization is double array: name in symbol and then an array for options.
-  -Layout
+  - Layout
   You can add texts and separators to your window.
       :separator - [x1, y1, x2, y2]
       :text - [text, x, y]
       
-  -Objects
+  - Objects
   Add GUI elements. The first option for objects is its name referenced by window, second is new objects insance. They are listed below. Note that objects position is relative to window's
   
-  -Additional options
+  - Additional options
   Window settings, they take no arguments
   :nox - window will have no X for closing
   :disabled - window is invisible at start
