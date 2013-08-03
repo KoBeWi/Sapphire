@@ -27,7 +27,7 @@ class Game
 	end
 
 	def reset
-		@entities=[[]] ; 1.times{@entities<<[]} #change #.times to number of defined groups
+		@entities=[[]] ; 1.times{@entities<<[]} #change to number of defined groups
 	end
 
 	def missing?(obj)

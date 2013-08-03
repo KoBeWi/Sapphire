@@ -130,29 +130,3 @@ class Trace < Entity
     end
 	end
 end
-
-class Combo < Entity
-  attr_reader :trigger
-  def initialize(timeout,*sequence)
-    @timeout,@sequence=timeout,sequence
-    @sequence.collect!{|key| if key.class==Symbol then $keys[key] else key end}
-    @combo=[]
-    @time=0
-    init
-  end
-  
-  def update
-    @time+=1
-    if Keypress.Any
-      @combo << Keypress.Any
-      @time=0
-    end
-    @combo.clear if @time==@timeout
-    
-    if @trigger
-      @trigger=nil
-      @combo.clear
-    end
-    @trigger=true if @combo.reverse.take(@sequence.length)==@sequence.reverse
-  end
-end

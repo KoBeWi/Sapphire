@@ -24,7 +24,7 @@ puts "-"*37
 if rq.split[0]==Dir.getwd+'/'+'!scite'
   `#{$path}scite/scite.exe`
 elsif rq.split[0]==Dir.getwd+'/'+'!help'
-  `notepad #{$path}README`
+  `notepad #{$path}documentation.txt`
 elsif rq.split[0]==Dir.getwd+'/'+'!template'
   name='Template' ; name=rq.split(' ')[1] if rq.split(' ')[1] and rq.split(' ')[1] != '!require'
   Dir.mkdir("#{name}")

@@ -1,27 +1,14 @@
 class Keypress
-  @@pressing=[[],[]]
 	def Keypress.[](id,repeat=true)
 		@@keys = [] unless defined?(@@keys)
     key=(id.class==Symbol ? $keys[id] : id)
     if repeat
       $screen.button_down?(key)
-    else
-      ($screen.button_down?(key) and !@@pressing[0].include?(key))
+    elsif !$pressing[0].include?(key) and $screen.button_down?(key)
+      $pressing[1] << key
+      return true
     end
 	end
-  
-  def Keypress.Push(id)
-    @@pressing[1] << id
-  end
-  
-  def Keypress.Remove(id)
-    @@pressing[0].delete(id)
-  end
-  
-  def Keypress.Clean
-    @@pressing[1].each{|key| @@pressing[0] << key}
-    @@pressing[1].clear
-  end
 end
 
 class Img
