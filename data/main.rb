@@ -1,6 +1,6 @@
 require 'gosu'
 include Gosu
-#remove some of these if you don't use EXE don't want/can't use them
+#remove some of these if you don't use EXE and don't want/can't use them
 require 'texplay'
 require 'gl'
 require 'glu'
@@ -22,7 +22,6 @@ class Main < Window
     self.caption="Title" #set caption
     $time=0
     $keys={:left=>KbLeft, :right=>KbRight, :jump=>KbSpace} #define input to use with Keypress[] method
-    $pressing=[[],[],[]]
   end
 
   def update
@@ -30,11 +29,7 @@ class Main < Window
     $game.update
     $time+=1
     
-    $pressing[0].each{|key| $pressing[2] << key if !button_down?(key)}
-    $pressing[2].each{|key| $pressing[0].delete(key)}
-    $pressing[2].clear
-    $pressing[1].each{|key| $pressing[0] << key}
-    $pressing[1].clear
+    Keypress.Clean
     
     Msc[$premusic[1]].play(true) if $premusic and !$premusic[0].playing? and !$premusic[0].paused?
   end
@@ -45,10 +40,12 @@ class Main < Window
   end
   
   def button_down(id)
+    Keypress.Push(id)
     $game.button_down(id) if $game.respond_to?(:button_down)
   end
   
   def button_up(id)
+    Keypress.Remove(id)
     $game.button_up(id) if $game.respond_to?(:button_up)
   end
 end

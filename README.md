@@ -1,7 +1,26 @@
+Sapphire (source version)
+The 'source' includes:
+-source code (with Template files)
+-exe
+-icon file
+-batch compiler for Windows/Ocra (pretty useless)
+-SciTe (Windows)
+-this file
+
+Sapphire is:
+-stand-alone Ruby for Windows, including gems for making games
+-template maker to start developing games with Ruby/Gosu easier
+
+
+If you are Windows, you can use the exe. If not, you need Ruby and run/compile Sapphire.rb to have same functionality.
+And having Ruby installed, the only interesting thing you can do is the !template command (see below).
+This file describes mainly the Template features.
+
+
 Specjal commands:
-!scite - opens text editor
+!scite - opens text editor (Windows only)
 !template - creates template for game
-  You can specify title by typing it after space
+  You can specify title by typing it after space (!template My_Title)
 
 Template is an empty game project with useful classes to help developing.
 
@@ -9,16 +28,13 @@ Template is an empty game project with useful classes to help developing.
 
 Template documentation:
 
-Global variables:
-- FONT - name of the default font
+Global variables used:
 - $time- global frame counter
 - $game - actual state of game
 - $screen - window instance
 - $keys - hash with symbol-stored keyboard input
 - $enable_gui - set true to enable GUI
-- $GUI - used by GUI
 - $premusic - used by music prelude
-- $preessing - used by input
 
 
 Code files: (number is for class index below)
@@ -32,7 +48,7 @@ Code files: (number is for class index below)
 -game.rb  // 7
     File for main game's state. Manages entities etc.
 
--utility&fx.rb  // 8,9,10,11,12,13,14
+-utility&fx.rb  // 8,9,10,11,12,13,14,15
     Tools for easy advanced entity control and classes taking care of simple effects, like particles etc.
 
 -GUI
@@ -52,6 +68,9 @@ Used for input checking, may use buttons from $keys
   def Keypress.[](id,repeat)
   id - Gosu::Button or symbol (located in $keys)
   repeat - when false, key is triggered once until releasing it
+
+  def Keypress.Any
+  Returns key pressed in current frame (button_down(id))
 
 3.Img \ Snd
 Loads specified resoure and saves in memory for re-use
@@ -123,7 +142,19 @@ Default class for handling game action. Manages in-game objects.
   Searchs entitiy passing specified block
   
   def find2(group,block)
-  Searchs entitiy in given grouo passing specified block
+  Searchs entitiy in given group passing specified block
+
+  def flash(color,speed,starting)
+  Makes simple flash effect
+    color - color of effect
+    speed - how fast effect proceeds (255 means instant)
+    starting - when true, screen is faded gradually, false means instant clear and then fade out of flash
+
+  def shake(max,time,num)
+  Makes simple shake effect by moving screen and creating boundaries
+    max - amplitude of oscillation
+    time - number of frames between changing position
+    num - number of shakes
 
 8.Counter
 Object used for countdowns
@@ -174,10 +205,19 @@ Single image, which fades out particular time
   speed - speed of fading (max 255)
   args - :angle,:scalex,:scaley,:color (MUST be Gosu::Color)
 
+15.Combo
+Used for reading key sequences
+
+  @trigger (reader) - changes to true when combo is successful
+
+  def initialize(timeout,sequence)
+  timeout - number of frames before combo cancels
+  sequence - array of buttons or defined key symbols
+
 
 How to use GUI
 -First you need to enable it, by calling  $enable_gui=true
--Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::(ObjName).new
+-Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::ObjName.new
 -GUI graphics can be customized in data/GUI. Use only four colors from GUI palette for compatibility
 
 >Window
@@ -236,7 +276,7 @@ Textbox - a monospaced line of text input
 Arguments: (x, y, max)
 -max - maximal number of characters
 
-Number - numeric input
+Number - numeric input with textbox
 Arguments: (x, y, minimal value, maximal value)
 min and max can be modified dynamically
 
