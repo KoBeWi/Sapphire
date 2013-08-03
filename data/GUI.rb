@@ -1,5 +1,5 @@
 module GUI
-  #define color(may be Gosu::Color not hex)
+  #define colors(may be Gosu::Color not hex)
   D_BCKG= 0xff808000
   L_BCKG= 0xff008000
   D_FRGND= 0xffc0c000
@@ -11,7 +11,7 @@ module GUI
   class System
     attr_accessor :x,:y,:z,:disabled,:inactive
     def System.Init
-      $GUI=[]
+      @@GUI=[]
       4.times{|i|
       Img['GUI/Cursor'].clear(:color=>[D_BCKG,L_BCKG,D_FRGND,L_FRGND][i],:dest_select=>[[0]*3+[1],[0.25]*3+[1],[0.5]*3+[1],[0.75]*3+[1]][i],:tolerance=>0.1)
       Img['GUI/Close'].clear(:color=>[D_BCKG,L_BCKG,D_FRGND,L_FRGND][i],:dest_select=>[[0]*3+[1],[0.25]*3+[1],[0.5]*3+[1],[0.75]*3+[1]][i],:tolerance=>0.1)
@@ -23,12 +23,12 @@ module GUI
     end
   
     def System.Update
-      $GUI.each{|s| s.update if !s.disabled and !s.inactive}
+      @@GUI.each{|s| s.update if !s.disabled and !s.inactive}
     end
   
     def System.Draw
       $screen.flush
-      $GUI.each{|s| s.draw if !s.disabled}
+      @@GUI.each{|s| s.draw if !s.disabled}
       $screen.flush
       Img['GUI/Cursor'].draw($screen.mouse_x,$screen.mouse_y,8)
     end
@@ -52,7 +52,11 @@ module GUI
     end
     
     def System.Clear
-      $GUI.clear
+      @@GUI.clear
+    end
+    
+    def System.Push(obj)
+      @@GUI << obj
     end
   end
   
@@ -68,7 +72,7 @@ module GUI
         obj[0].y=@y+Img['GUI/Close'].height+obj[2]
         obj[0].z=@z
         obj[0].disabled=@disabled}
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -145,7 +149,7 @@ module GUI
     def initialize(x,y,text)
       @x,@y,@text=x,y,text
       @z=1
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -180,7 +184,7 @@ module GUI
       @x,@y,@max,@unit=x,y,max,unit
       @z=1
       @value=0
-      $GUI << self
+      GUI::System.Push(self)
     end
   
     def update
@@ -215,7 +219,7 @@ module GUI
     def initialize(x,y,negateable=nil)
       @x,@y,@negateable=x,y,negateable
       @z=1
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -253,7 +257,7 @@ module GUI
       @ys=[]
       img=Tls['GUI/Radio',-2,-1][0]
       @choices.each{|ch| w=Fnt[FONT,FONT_SIZE].text_width(ch) ; @width=w+16+img.width if w+img.width>@width ; @ys << ((8+(i=@choices.index(ch)*FONT_SIZE))...(8+i+img.height)).to_a}
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -300,7 +304,7 @@ module GUI
       @width=16
       @choices.each{|ch| if (w=Fnt[FONT,FONT_SIZE].text_width(ch)+12)>@width then @width=w+12 end}
       @last=@choices.length
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -363,7 +367,7 @@ module GUI
       @x,@y,@max=x,y,max
       @z=1
       @width=Fnt[FONT,FONT_SIZE].text_width('m'*max)+8
-      $GUI << self
+      GUI::System.Push(self)
     end
 
     def update
@@ -389,10 +393,10 @@ module GUI
       self.caret_pos=self.selection_start=[caret,self.text.length].min if change
       $screen.draw_quad(@x,@y,c=D_BCKG,@x+@width+8,@y,c,@x+@width+8,@y+FONT_SIZE+10,c,@x,@y+FONT_SIZE+10,c,@z+0.2)
       $screen.draw_quad(@x+4,@y+4,c=L_BCKG,@x+@width+4,@y+4,c,@x+@width+4,@y+FONT_SIZE+6,c,@x+4,@y+FONT_SIZE+6,c,@z+0.2)
-      $screen.draw_quad(@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start),@y+4,c=L_FRGND,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+4,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+FONT_SIZE+6,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self
+      $screen.draw_quad(@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start)+4,@y+4,c=L_FRGND,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos)+4,@y+4,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos)+4,@y+FONT_SIZE+6,c,@x+4+Fnt[FONT,FONT_SIZE].text_width('m'*self.selection_start)+4,@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self
       x=0
       self.text.each_char{|char| Fnt[FONT,FONT_SIZE].draw(char,@x+8+x*Fnt[FONT,FONT_SIZE].text_width("m"),@y+6,@z+0.2,1,1,FONT_COLOR) ; x+=1}
-      $screen.draw_line(@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+4,c=D_FRGND,@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos),@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self and $count%60<30
+      $screen.draw_line(@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos)+4,@y+4,c=D_FRGND,@x+6+Fnt[FONT,FONT_SIZE].text_width('m'*self.caret_pos)+4,@y+FONT_SIZE+6,c,@z+0.2) if $screen.text_input==self and $time%60<30
     end
     
     def value
@@ -413,7 +417,8 @@ module GUI
       @value=@min
       @wait=0
       @width=Fnt[FONT,FONT_SIZE].text_width('9'*([@min.to_s.length,@max.to_s.length].max+1))+4
-      $GUI << self
+      GUI::System.Push(self)
+      @field=Textbox.new(@x,@y,[@min.to_s.length,@max.to_s.length].max)
     end
   
     def update
@@ -435,13 +440,21 @@ module GUI
       elsif !Keypress[MsLeft]
         @clicked=nil
       end
+      
+      if $screen.text_input==@field and !@input
+        @input=true
+      elsif $screen.text_input != @field and @input
+        @value=[[@field.text.to_i,@min].max,@max].min
+        @input=nil
+      elsif $screen.text_input != @field
+        @field.text=@value
+      end
     end
   
     def draw
       img=Tls['GUI/Dropdown',-2,-2][0]
       $screen.draw_quad(@x,@y,c=D_BCKG,@x+@width+4,@y,c,@x+@width+4,@y+24,c,@x,@y+24,c,@z+0.2)
       $screen.draw_quad(@x+4,@y+4,c=L_BCKG,@x+@width,@y+4,c,@x+@width,@y+20,c,@x+4,@y+20,c,@z+0.2)
-      Fnt[FONT,FONT_SIZE].draw(@value,@x+8,@y+4,@z+0.2,1,1,FONT_COLOR)
       Tls['GUI/Dropdown',-2,-2][@clicked==:up ? 1 : 2].draw(@x+@width+4,@y,@z+0.2,1,0.5)
       Tls['GUI/Dropdown',-2,-2][@clicked==:down ? 3 : 0].draw(@x+@width+4,@y+img.height/2,@z+0.2,1,0.5)
     end
