@@ -24,7 +24,7 @@ puts "-"*37
 if rq.split[0]==Dir.getwd+'/'+'!scite'
   `#{$path}scite/scite.exe`
 elsif rq.split[0]==Dir.getwd+'/'+'!help'
-  `notepad #{$path}README`
+  `notepad #{$path}README.md`
 elsif rq.split[0]==Dir.getwd+'/'+'!template'
   name='Template' ; name=rq.split(' ')[1] if rq.split(' ')[1] and rq.split(' ')[1] != '!require'
   Dir.mkdir("#{name}")
@@ -61,7 +61,9 @@ elsif rq.split[0]==Dir.getwd+'/'+'!template'
   f1.close ; f2.close
   
   f1=File.new(name+'/data/scripts/'+'objects.rb','w')
-  f1.close
+  f2=File.open($path+'data/objects.rb','r')
+  f1.puts(f2.readlines.join)
+  f1.close ; f2.close
   
   ['Check.png','Close.png','Cursor.png','Dropdown.png','Radio.png','Zip.png'].each{|img| FileUtils.cp($path+'data/GUI/'+img,name+'/data/GUI/'+img)}
   

@@ -1,8 +1,9 @@
 class Keypress
   @@pressing=[[],[]]
+  @@keys={}
 	def Keypress.[](id,repeat=true)
 		@@keys = [] unless defined?(@@keys)
-    key=(id.class==Symbol ? $keys[id] : id)
+    key=(id.class==Symbol ? @@keys[id] : id)
     if repeat
       $screen.button_down?(key)
     else
@@ -21,6 +22,18 @@ class Keypress
   def Keypress.Clean
     @@pressing[1].each{|key| @@pressing[0] << key}
     @@pressing[1].clear
+  end
+  
+  def Keypress.Define(keys={})
+    @@keys=keys
+  end
+  
+  def Keypress.Set(key,new)
+    @@keys[key]=new
+  end
+  
+  def Keypress.Any
+    @@pressing[1].last
   end
 end
 
@@ -80,6 +93,7 @@ class Msc
 			dir=((Dir.exists?(file="data/music/#{name.split('/')[0]}") or File.exists?(file+'.ogg')) ? '/music' : '')
       pre=File.exists?("data#{dir}/#{name}-pre.ogg")
     end
+    Msc[name] if pre
     name+='-pre' if pre
     if !@@music[name.downcase]
 			dir=((Dir.exists?(file="data/music/#{name.split('/')[0]}") or File.exists?(file+'.ogg')) ? '/music' : '')
@@ -146,15 +160,18 @@ class BitmapFont
 end
 
 class Entity
-	attr_accessor :x,:y,:stop,:invisible,:removed
+	attr_accessor :x,:y,:stop,:invisible
+  attr_reader :removed,:spawn_time
 	def init(*types)
-		$game.entities[0] << self
-    $game.entities[1] << self if types.include?(:tile)
+		$state.entities[0] << self
+    $state.entities[1] << self if types.include?(:tile)
     #define additional groups like above
+    
+    @spawn_time=$time
 	end
 
 	def remove
-    $game.remove(self)
+    $state.remove(self)
     @removed=true
 	end
 
@@ -162,9 +179,9 @@ class Entity
 		@vy||=0
 		@vy+=gravity
 		if @vy>0
-			@vy.to_i.times{if !$game.solid?(@x,@y+height,true) and !$game.solid?(@x+width,@y+height,true) ; @y+=1 else @vy=0 end}
+			@vy.to_i.times{if !$state.solid?(@x,@y+height,true) and !$state.solid?(@x+width,@y+height,true) ; @y+=1 else @vy=0 end}
 		elsif @vy<0
-			(-@vy).to_i.times{if !$game.solid?(@x,@y,true) and !$game.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
+			(-@vy).to_i.times{if !$state.solid?(@x,@y,true) and !$state.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
 		end
 	end
 end

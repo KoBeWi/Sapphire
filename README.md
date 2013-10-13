@@ -14,7 +14,7 @@ Sapphire is:
 
 
 If you are Windows, you can use the exe. If not, you need Ruby and run/compile Sapphire.rb to have same functionality.
-And having Ruby installed, the only interesting thing you can do is the !template command (see below).
+And having Ruby installed, the only interesting thing you can do is the !template command (see below). Just run Sapphire.rb
 This file describes mainly the Template features.
 
 
@@ -24,16 +24,14 @@ Specjal commands:
   You can specify title by typing it after space (!template My_Title)
 
 Template is an empty game project with useful classes to help developing.
-
-
+__________________________________________________________________________________________________________
 
 Template documentation:
 
 Global variables used:
 - $time- global frame counter
-- $game - actual state of game
+- $state - current state of game, which is being updated and drawn
 - $screen - window instance
-- $keys - hash with symbol-stored keyboard input
 - $enable_gui - set true to enable GUI
 - $premusic - used by music prelude
 
@@ -49,8 +47,11 @@ Code files: (number is for class index below)
 - game.rb  // 7
     File for main game's state. Manages entities etc.
 
-- utility&fx.rb  // 8,9,10,11,12,13,14,15
-    Tools for easy advanced entity control and classes taking care of simple effects, like particles etc.
+- utility&fx.rb  // 8,9,10,11,12,13,14,15,16,17,18
+    Tools for easy advanced entity control and classes taking care of simple effects, like particles etc. Also some collision classes
+    
+  objects.rb // 19
+    You can put your objects here
 
 - GUI
     Contains GUI module
@@ -64,7 +65,7 @@ Window class responsible for updating and drawing game states and reading input.
  Checks if specified key is pressed/released. Needs to be placed in state class to work
 
 2.Keypress
-Used for input checking, may use buttons from $keys
+Used for input checking, allows to bind keys to symbols
 
   def Keypress.[](id,repeat)
   id - Gosu::Button or symbol (located in $keys)
@@ -72,6 +73,12 @@ Used for input checking, may use buttons from $keys
 
   def Keypress.Any
   Returns key pressed in current frame (button_down(id))
+  
+  def Keypress.Define(keys)
+  Defines controls (used in main.rb). keys must be a {:symbol=>Gosu::Button} hash
+  
+  def Keypress.Set(key,new)
+  Binds one key, where 'key' is :symbol of key and 'new' is Button to be stored
 
 3.Img \ Snd
 Loads specified resoure and saves in memory for re-use
@@ -116,6 +123,7 @@ Main class for game objects.
   @stop (accessor) - prevents entity update
   @invisible (accessor) - skips entity in drawing
   @removed (reader) - entity was removed (see below)
+  @spawn_time (reader) - $time value when object was initialized. May be used for counters etc. ($time-@spawn_time is a lifetime value)
 
   def init(types)
   Pushes entity to game's entity array, so it's being updated. Use types arrray for grouping entities for easier managing
@@ -139,11 +147,8 @@ Default class for handling game action. Manages in-game objects.
   def missing?(entity)
   Checks if entity is removed
   
-  def find(block)
-  Searchs entitiy passing specified block
-  
-  def find2(group,block)
-  Searchs entitiy in given group passing specified block
+  def find(group) {block}
+  Searchs entitiy passing specified block. If no group is given, it will process through all entities
 
   def flash(color,speed,starting)
   Makes simple flash effect
@@ -182,7 +187,7 @@ Slows entities' update for certain ammount of frames (see: Flasher)
 Simple falling object, may be use eg. for crashing glass
 
   def initialize(x,y,z,img,vx,vy,args)
-  img - path to image or array for tile values (["imagename",w,h] instead of Tls method)
+  img - path to image or array for tile values (["imagename",w,h,id] instead of Tls method)
   vx/vy - initial speed
   args - hash arguments:
     :angle - initial angle of image (default: 0)
@@ -195,9 +200,10 @@ Single animation sequence, which disappears after finishing
 
   def initialize(x,y,z,tiles,sequence,time,args)
   tiles - not Tls, but simple array (see: Particle)
-  sequence - array of numbers, corresponding for frames in animation
   time - frame length of each frame
   args - :scalex, :scaley, :color
+    :sequence - array of numbers, corresponding for frames in spriteset. Used for custom animation order
+    :repeat - number of times to repeat sequence
 
 14.Trace
 Single image, which fades out particular time
@@ -205,6 +211,7 @@ Single image, which fades out particular time
   def initialize(x,y,img,speed,args={})
   speed - speed of fading (max 255)
   args - :angle,:scalex,:scaley,:color (MUST be Gosu::Color)
+    :inverted - fades in instead of out
 
 15.Combo
 Used for reading key sequences
@@ -214,15 +221,107 @@ Used for reading key sequences
   def initialize(timeout,sequence)
   timeout - number of frames before combo cancels
   sequence - array of buttons or defined key symbols
+  
+16.Collision_Box
+For bounding box collision detection ; attach it to object
 
+  @w,@h (writer) - size of box
+  
+  def initialize(x,y,w,h,a)
+  x,y - coordinates of the center
+  w,h - width and height of box
+  a - angle of box, around center
+  
+  def collides?(col)
+  Returns true if box intersects with col (col is either Collision_Box, Collision_Ball or Collission_Group)
+  
+  def set(x,y,a)
+  Binds new values for x,y and angle ; use it to follow object box is attached
+  
+  def move(x,y,a)
+  Adds given values to x,y and angle
+  
+17.Collision_Ball
+For bounding sphere (circle) collision detection ; attach it to object
+
+  @r (writer) - radius of ball
+  
+  def initialize(x,y,r)
+  x,y - coordinates of the center
+  r - radius
+  
+  def collides?(col)
+  
+  def set(x,y)
+  Binds new values for x,y ; use it to follow object box is attached
+  
+  def move(x,y)
+  Adds given values to x,y
+  
+17.Collision_Group
+Group of balls and boxes ; they will move relatively to group position
+
+  @c (reader) - array of colliders attached
+  
+  def initialize(x,y,a,*c)
+  x,y - coordinates of group
+  a - angle
+  c - array of colliders
+  
+  def collides?(col)
+  Checks if any of attached colliders intersect with col
+  
+  def set(x,y,a)
+  Binds new values for x,y and angle ; children colliders will move accordingly
+  
+  def move(x,y,a)
+  Adds given values to x,y and angle of children colliders
+  
+18.Projectile
+Template class for projetiles. Includes functions like moving, homing, falling etc. but you have to define yourself how does this interact with other objects
+
+Z - constant for default z-order of projectile
+@time - a variable that counts frame lifetime of projectile
+
+def initialize(x,y,type,img,args={})
+img - look: trail
+type - :trail, :bullet or :arrow  ;  Defines projectile logic. Types take different hash arguments, some of which are even required
+  - :trail - Static animation, useful for explosions ; Takes arguments:
+  :animation - array [number of frames, $time per frame], uses images from img, trails without defined animation will be single-image
+  :sequence - define order of frames in animation
+  :repeat - number of times to repeat animation or lifetime of single-image
+  :movex,:movey - makes trail moving with given speed
+  
+  - :bullet - Straigh projectile, good for bullets, missiles etc.
+  :dir (REQUIRED) - direction of bullet
+  :speed - speed of bullet (default is 1)
+  :folllow - array [target entity, target offset x, target offset y, bullet offset x, bullet offset y], target will be followed by bullet so offset of bullet will point offset of target
+  :accuracy - ability to turn while following, default is 1
+  :limit - limit of following time
+  :pointing - bullet image angle will follow dir, pointing is integer which also defines offset of angle
+  
+  - :arrow - Falling projectile, like arrow or grenade. Make it bouncing yourself
+  :vx,:vy (REQUIRED) - starting velocity of arrow
+  :gravity - default is 1
+  :pointing - arrow image angle will follow velocity direction, pointing is integer which also defines offset of angle
+  
+  type-independent args:
+  :angle - angle of projectile's image
+  :rotate - angle of projectile changes by this value per frame
+  :animation,:sequence - may be used for non-trail projectiles, they won't dissappear like trail
+  :z - z-order if different than default
+  :scalex,:scaley - scale of image
+  :color - color of image
+__________________________________________________________________________________________________________
 
 How to use GUI
+- GUI is feature included in game template
 - First you need to enable it, by calling  $enable_gui=true
 - Then just initialize some GUI objects to use them. It's better to place them in GUI's window. To initialize objects use GUI::ObjName.new
 - GUI graphics can be customized in data/GUI. Use only four colors from GUI palette for compatibility
 
->Window
--GUI::Window.new(x,y,width,height,title,customization)
+Window
+- GUI::Window.new(x,y,width,height,title,customization)
 x,y - position of window
 width,height - window size
 title - window caption
@@ -249,7 +348,7 @@ Windows can be closed and moved. You can only use actve window (the one with for
 Windows has also instance variables that can be changed anytime: @nox, @docked, @disabled
 You can also retrieve and set values of window's objects by Window.value(object name) and Window.set_value(objects name, value)
 
->GUI Objects
+GUI Objects
 Every objects has its  :value  accessor so values can be easily read and written
 They have a   :changed   reader, that returns true if value was changed last frame
 They also have a variable  @disabled  that makes them invisible

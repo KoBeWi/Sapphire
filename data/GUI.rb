@@ -418,7 +418,7 @@ module GUI
       @wait=0
       @width=Fnt[FONT,FONT_SIZE].text_width('9'*([@min.to_s.length,@max.to_s.length].max+1))+4
       GUI::System.Push(self)
-      @field=Textbox.new(@x,@y,[@min.to_s.length,@max.to_s.length].max)
+      @field=Textbox.new(@x,@y-1,[@min.to_s.length,@max.to_s.length].max)
     end
   
     def update

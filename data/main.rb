@@ -1,6 +1,7 @@
 require 'gosu'
 include Gosu
 #remove some of these if you don't use EXE and don't want/can't use them
+require 'ashton'
 require 'texplay'
 require 'gl'
 require 'glu'
@@ -19,14 +20,14 @@ FONT=default_font_name #default font, remove if you won't use it
 class Main < Window
   def initialize(fullscreen=false)
     super(640, 480, fullscreen) #set resolution and fullscreen mode
-    self.caption="Title" #set caption
+    self.caption="Title" #set window caption
     $time=0
-    $keys={:left=>KbLeft, :right=>KbRight, :jump=>KbSpace} #define input to use with Keypress[] method
+    Keypress.Define :left=>KbLeft, :right=>KbRight, :jump=>KbSpace #define input to use with Keypress[] method
   end
 
   def update
     GUI::System.Update if $enable_gui
-    $game.update
+    $state.update
     $time+=1
     
     Keypress.Clean
@@ -35,22 +36,22 @@ class Main < Window
   end
 
   def draw
-    $game.draw
+    $state.draw
     GUI::System.Draw if $enable_gui
   end
   
   def button_down(id)
     Keypress.Push(id)
-    $game.button_down(id) if $game.respond_to?(:button_down)
+    $state.button_down(id) if $state.respond_to?(:button_down)
   end
   
   def button_up(id)
     Keypress.Remove(id)
-    $game.button_up(id) if $game.respond_to?(:button_up)
+    $state.button_up(id) if $state.respond_to?(:button_up)
   end
 end
 
 $screen=Main.new
 GUI::System.Init
-$game=Game.new
+$state=Game.new
 $screen.show

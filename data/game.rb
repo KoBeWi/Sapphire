@@ -1,7 +1,7 @@
 class Game
 	attr_accessor :entities,:scx,:scy
   def initialize
-		$game=self
+		$state=self
 		reset
     @scx=@scy=0
     @removed=[]
@@ -34,12 +34,8 @@ class Game
 		!@entities[0].include?(obj) or obj.removed
 	end
   
-  def find(&search)
-    $game.entities[0].find search
-  end
-  
-  def find2(group,&search)
-    $game.entities[group].find search
+  def find(group=0)
+    @entities[group].find{|ent| yield(ent)}
   end
   
   def remove(ent)
