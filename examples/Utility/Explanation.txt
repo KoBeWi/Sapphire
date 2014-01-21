@@ -1,0 +1,17 @@
+This example is about some near-useless utility objects.
+First one is delayer. It's used to delay object's update method by switching @stop variable. Im creates lagging effect instead of desired slow-motion, but still someone can use it as it works for ANY Entity. Hold Space to lag everything, but camera.
+Second is flasher. It creates simple flashing effect by disabling draw for entity. Use Left Control to flash Cptn Sapphire.
+Third is mover. It just moves ANY Entity with choosen speed. In this example, it slowly moves gems down.
+Each one of these takes first argument as array of target entities and then time for Delayer, two times for Flasher and x speed and y speed for mover.
+
+There's also a timer class. It's created passing number of ticks to count. When it finishes, it just changes it's @finished variable to true and removes.
+But very interesting feature is the Timer.image, which returns remaining frames (ticks) as a string with time representation (minutes, seconds etc.) and you can choose which ones to show.
+In the example, if Timer finishes it's job, all gems disappear.
+
+Summary - This example shows how to:
+-use Delayer, Flasher and Mover
+-use timer
+-show timer
+
+Files to look in:
+game.rb

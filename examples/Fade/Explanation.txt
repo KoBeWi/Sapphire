@@ -1,0 +1,14 @@
+This shows how to make a fade effect.
+First, you need a fade effect image. It's simple image with a grayscale colors. Brighter colors (with greater luminance/value) will fade out first and fade in last.
+Then you call $screen.fade_out or $screen.fade_in. First parameter of these methods is the name of effect. Each effect (image) should be in 'data/fades' directory. Second is the fade speed (number), where 1 is about 15 seconds long effect and 1000 is an instant.
+Optional parameter is bool that tells if it should be in solid (true) or smooth (false) mode. Smooth mode draw the effect partially translucent, so it slowly becomes opaque. Solid mode draws pixels either opaque or completely transparent, so it is less subtle.
+There are two additional methods. First one is fade_mode ($screen.fade_mode). It also takes bool and defines default fade mode (solid/smooth). When you then fade without arguments, this default mode will be used.
+There's also an .unfade method. When screen fades out, window's draw cycle automatically stops waiting for fade in. But you don't have to fade in as calling unfade will just restore the draw cycle.
+
+Summary - This example shows how to:
+-fade out
+-fade in
+-operate some fading values
+
+Files to look in:
+game.rb

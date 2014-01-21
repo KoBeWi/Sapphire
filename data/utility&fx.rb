@@ -42,11 +42,17 @@ class Flasher < Entity
   end
 
   def update
-    (@delay=Timer.new(@time ? @time2 : @time1) ; @time=!@time) if !@delay
+    @delay||=Timer.new(@time ? @time2 : @time1)
     if @delay.finished
       @entities.each{|ent| ent.invisible=!ent.invisible}
       @delay=nil
     end
+  end
+  
+  def remove
+    super
+    @entities.each{|ent| ent.invisible=nil}
+    @delay=@time=nil
   end
 end
 
@@ -58,10 +64,18 @@ class Delayer < Entity
   end
 
   def update
-    (@delay=Timer.new(@time) ; @entities.each{|ent| ent.stop=true}) if !@delay
+    @entities.each{|ent| ent.stop=true if ent != self} if !@delay
+    @delay||=Timer.new(@time)
     if @delay.finished
-      @entities.each{|ent| ent.stop=@delay=nil}
+      @entities.each{|ent| ent.stop=false}
+      @delay=nil
     end
+  end
+  
+  def remove
+    super
+    @entities.each{|ent| ent.stop=nil}
+    @delay=nil
   end
 end
 
@@ -76,7 +90,7 @@ class Particle < Entity
 	def update
 		@x+=@vx ; @y+=(@vy+=1)
     @args[:angle]+=@args[:rotate] if @args[:rotate]
-		remove if @y>$game.scy+$screen.height
+		remove if @y>$state.camera.pos_y+$screen.height
 	end
 
 	def draw
@@ -145,7 +159,7 @@ class Combo < Entity
   attr_reader :trigger
   def initialize(timeout,*sequence)
     @timeout,@sequence=timeout,sequence
-    @sequence.collect!{|key| if key.class==Symbol then $keys[key] else key end}
+    @sequence.collect!{|key| if key.class==Symbol then Keypress.Keys[key] else key end}
     @combo=[]
     @time=0
     init
@@ -167,17 +181,10 @@ class Combo < Entity
   end
 end
 
-class Vector
-  attr_reader :x,:y
-  def initialize(x,y)
-    @x,@y=x.to_f,y.to_f
-  end
-end
-
 class Collision_Box
   attr_reader :x,:y,:w,:h,:a,:vectors
   attr_writer :w,:h
-  def initialize(x,y,w,h,a)
+  def initialize(x,y,w,h,a=0)
     @x,@y,@w,@h,@a=x,y,w,h,(180-a)
     set_vectors
   end
@@ -187,16 +194,25 @@ class Collision_Box
     
     if col.class==Collision_Box
       4.times{|i|
-        axis=Vector.new(@vectors[1].x-@vectors[0].x, @vectors[1].y-@vectors[0].y) if i==0
-        axis=Vector.new(@vectors[1].x-@vectors[2].x, @vectors[1].y-@vectors[2].y) if i==1
-        axis=Vector.new(col.vectors[0].x-col.vectors[3].x, col.vectors[0].y-col.vectors[3].y) if i==2
-        axis=Vector.new(col.vectors[0].x-col.vectors[1].x, col.vectors[0].y-col.vectors[1].y) if i==3
+        if i==0
+          axisx=@vectors[2]-@vectors[0]
+          axisy=@vectors[3]-@vectors[1]
+        elsif i==1
+          axisx=@vectors[2]-@vectors[4]
+          axisy=@vectors[3]-@vectors[5]
+        elsif i==2
+          axisx=col.vectors[0]-col.vectors[6]
+          axisy=col.vectors[1]-col.vectors[7]
+        elsif i==3
+          axisx=col.vectors[0]-col.vectors[2]
+          axisy=col.vectors[1]-col.vectors[3]
+        end
         
         values1=[]
         values2=[]
         4.times{|p|
-        values1 << ((@vectors[p].x * axis.x + @vectors[p].y * axis.y) / (axis.x ** 2 + axis.y ** 2))* axis.x ** 2 + ((@vectors[p].x * axis.x + @vectors[p].y * axis.y) / (axis.x ** 2 + axis.y ** 2)) * axis.y ** 2
-        values2 << ((col.vectors[p].x * axis.x + col.vectors[p].y * axis.y) / (axis.x ** 2 + axis.y ** 2))* axis.x ** 2 + ((col.vectors[p].x * axis.x + col.vectors[p].y * axis.y) / (axis.x ** 2 + axis.y ** 2))* axis.y ** 2
+        values1 << ((@vectors[p*2] * axisx + @vectors[p*2+1] * axisy) / (axisx ** 2 + axisy ** 2)) * axisx ** 2 + ((@vectors[p*2] * axisx + @vectors[p*2+1] * axisy) / (axisx ** 2 + axisy ** 2)) * axisy ** 2
+        values2 << ((col.vectors[p*2] * axisx + col.vectors[p*2+1] * axisy) / (axisx ** 2 + axisy ** 2))* axisx ** 2 + ((col.vectors[p*2] * axisx + col.vectors[p*2+1] * axisy) / (axisx ** 2 + axisy ** 2))* axisy ** 2
         }
         
         return if not values2.min<=values1.max && values2.max>=values1.min
@@ -229,8 +245,8 @@ class Collision_Box
     end
   end
   
-  def set(x,y,a=@a)
-    @x,@y,@a=x,y,a
+  def set(x,y,a=-@a)
+    @x,@y,@a=x,y,-a
     set_vectors
   end
   
@@ -245,10 +261,7 @@ class Collision_Box
     d=Math.sqrt(@w**2+@h**2)/2
     a=Math::PI*(angle(0,0,@w,@h)/180.0)
     a1=Math::PI*(@a/180.0)
-    @vectors=[Vector.new(@x+Math.sin(a1-a)*d,@y+Math.cos(a1-a)*d),
-    Vector.new(@x+Math.sin(a1+a)*d,@y+Math.cos(a1+a)*d),
-    Vector.new(@x+Math.sin(a1+Math::PI-a)*d,@y+Math.cos(a1+Math::PI-a)*d),
-    Vector.new(@x+Math.sin(a1+Math::PI+a)*d,@y+Math.cos(a1+Math::PI+a)*d)]
+    @vectors=[@x+Math.sin(a1-a)*d, @y+Math.cos(a1-a)*d, @x+Math.sin(a1+a)*d, @y+Math.cos(a1+a)*d, @x+Math.sin(a1+Math::PI-a)*d, @y+Math.cos(a1+Math::PI-a)*d, @x+Math.sin(a1+Math::PI+a)*d, @y+Math.cos(a1+Math::PI+a)*d]
   end
 end
 
@@ -290,7 +303,7 @@ class Collision_Ball
     end
   end
   
-  def set(x,y)
+  def set(x,y,a=nil)
     @x,@y=x,y
   end
   
@@ -316,14 +329,263 @@ class Collision_Group
   end
   
   def set(x,y,a=@a)
-    @c.each{|c| c.class==Collission_Ball ? c.move(x-@x,y-@y) : c.move(x-@x,y-@y,a-@a)}
-    @x,@y,@a=x,y,a
+    a=-(180-a)
+    da=a-@a
+    @x,@y=x,y
+    
+    @c.each{|c| dist=distance(@x,@y,c.x,c.y) ; rot=angle(@x,@y,c.x,c.y)
+      c.set(@x+offset_x(rot+(a-@a),dist),@y+offset_y(rot+(a-@a),dist),-c.a+da)
+    }
+    @a=a
   end
   
   def move(x=0,y=0,a=0)
-    @c.each{|c| c.class==Collission_Ball ? c.move(x,y) : c.move(x,y,a)}
     @x+=x
     @y+=y
-    @a+=a
+    @a-=a
+    
+    @c.each{|c| dist=distance(@x,@y,c.x,c.y) ; rot=angle(@x,@y,c.x,c.y)
+      c.set(@x+offset_x(rot+a,dist),@y+offset_y(rot+a,dist),-c.a-a)}
+  end
+end
+
+class Camera < Entity
+  def initialize(x,y)
+    @x,@y=x,y
+    @offx=@offy=@shake_x=@shake_y=0
+    init
+  end
+  
+  def update
+    if @follow
+      x=@follow.x+@offx ; y=@follow.y+@offy
+      if @smooth
+        if distance(@x,@y,x,y)>@smooth
+          dir=angle(@x,@y,x,y)
+          @x+=offset_x(dir,@smooth)
+          @y+=offset_y(dir,@smooth)
+        else
+          @x=x ; @y=y
+          @done=true
+        end
+      else
+        @x=x ; @y=y
+        @done=true
+      end
+    end
+    
+    if @move
+      x=@move[0]+@offx ; y=@move[1]+@offy
+      if distance(@x,@y,x,y)>@move[2]
+        dir=angle(@x,@y,x,y)
+        @x+=offset_x(dir,@move[2])
+        @y+=offset_y(dir,@move[2])
+      else
+        @x=x ; @y=y
+        @done=true
+      end
+    end
+    
+    if @scroll
+      @x+=@scroll[0]
+      @y+=@scroll[1]
+    end
+    
+    if @boundary
+      @x=[[@boundary[0],@x].max,@boundary[1]].min
+      @y=[[@boundary[2],@y].max,@boundary[3]].min
+    end
+    
+		if @shake
+      @shake[0]+=1
+      if @shake[0]==@shake[2]
+        @shake[3]-=1
+        @shake[0]=0
+        
+        @shake_x=-@shake[1]+rand(@shake[1]*2+1)
+        @shake_y=-@shake[1]+rand(@shake[1]*2+1)
+      end
+      
+			if @shake[3]==0
+        @shake=nil
+        @shake_x=@shake_y=0
+      end
+		end
+  end
+  
+  def draw
+    if @shake and @boundary and $state.camera==self
+      x=@x+@shake_x ; y=@y+@shake_y
+      w=$screen.width/2 ; h=$screen.height/2
+			$screen.draw_quad(x-w,y-h,c=0xff000000,x+w,y-h,c,x+w,@boundary[2]-h,c,x-w,@boundary[2]-h,c,$state.shake_z) if y<@boundary[2]
+			$screen.draw_quad(@boundary[1]+w,y-h,c=0xff000000,x+w,y-h,c,x+w,y+h,c,@boundary[1]+w,y+h,c,$state.shake_z) if x>@boundary[1]
+			$screen.draw_quad(x-w,@boundary[3]+h,c=0xff000000,x+w,@boundary[3]+h,c,x+w,y+h,c,x-w,y+h,c,$state.shake_z) if y>@boundary[3]
+			$screen.draw_quad(x-w,y-h,c=0xff000000,@boundary[0]-w,y-h,c,@boundary[0]-w,y+h,c,x-w,y+h,c,$state.shake_z) if x<@boundary[0]
+    end
+  end
+  
+  def follow(entity,smooth=false)
+    reset
+    @follow=entity
+    @smooth=smooth
+  end
+  
+  def move(x,y,speed)
+    reset
+    @move=[x,y,speed]
+  end
+  
+  def scroll(vx,vy)
+    @scroll=vx,vy
+    
+    @follow=@move=nil
+  end
+  
+  def boundary(x1,y1,x2,y2)
+    @boundary=[x1+$screen.width/2,x2-$screen.width/2,y1+$screen.height/2,y2-$screen.height/2]
+  end
+  
+  def offset(x,y)
+    @offx=x if x
+    @offy=y if y
+  end
+  
+  def set(x,y)
+    @x=x+@offx
+    @y=y+@offy
+  end
+  
+  def pos_x
+    @x-$screen.width/2+@shake_x
+  end
+  
+  def pos_y
+    @y-$screen.height/2+@shake_y
+  end
+  
+  def shader(shader)
+    @shader=shader
+  end
+  
+  def shader?
+    @shader
+  end
+  
+  def shake(max,time,num)
+    @shake=[time-1,max,time,num+1]
+  end
+end
+
+class Light < Entity
+  attr_accessor :radius,:color,:luminance
+  def initialize(x,y,radius,color=0xffffffff,luminance=1)
+    @x,@y,@radius,@color,@luminance=x,y,radius,color,luminance
+    init
+  end
+  
+  def update
+    $state.lights << self
+  end
+end
+
+class Sequence < Entity
+  def initialize(sequence)
+    @sequence=sequence
+    init
+  end
+  
+  def update
+    @action||=@sequence[0]
+    case @action[:type]
+      when :wait
+      next_action if (@action[:time]-=1)==0
+      
+      when :camera_move
+      if !@setup
+        $state.camera.move(@action[:target][0],@action[:target][1],@action[:target][2])
+        @setup=true
+      elsif $state.camera.done or @action[:skip]
+        next_action
+      end
+      
+      when :camera_follow
+      if !@setup
+        $state.camera.follow(@action[:target],@action[:smooth])
+        @setup=true
+      elsif $state.camera.done or @action[:skip]
+        next_action
+      end
+      
+      when :flash
+      if !@setup
+        $state.flash(*@action[:values])
+        @setup=true
+      elsif !$state.flashing? or @action[:skip]
+        next_action
+      end
+      
+      when :shake
+      if !@setup
+        $state.shake(*@action[:values])
+        @setup=true
+      elsif !$state.camera.shaking? or @action[:skip]
+        next_action
+      end
+      
+      when :trail
+      if !@setup
+        @setup=Trail.new(*@action[:values])
+      elsif @setup.removed or @action[:skip]
+        next_action
+      end
+      
+      when :trace
+      if !@setup
+        @setup=Trace.new(*@action[:values])
+      elsif @setup.removed or @action[:skip]
+        next_action
+      end
+      
+      when :particle
+      if !@setup
+        @setup=Particle.new(*@action[:values])
+      elsif @setup.removed or @action[:skip]
+        next_action
+      end
+      
+      when :sample
+      if !@setup
+        @setup=Snd[@action[:name]].play
+      elsif !@setup.playing? or @action[:skip]
+        next_action
+      end
+      
+      when :entity
+      Kernel.const_get(@action[:class]).new(*@action[:values])
+      next_action
+      
+      when :fade_in
+      if !@setup
+        $screen.fade_in(@action[:effect],@action[:speed],@action[:mode])
+        @setup=true
+      elsif !$screen.fade
+        next_action
+      end
+      
+      when :fade_out
+      if !@setup
+        $screen.fade_out(@action[:effect],@action[:speed],@action[:mode])
+        @setup=true
+      elsif !$screen.fade
+        next_action
+      end
+    end
+  end
+  
+  def next_action
+    @setup=nil
+    @action=nil
+    @sequence.shift
+    remove if @sequence.empty?
   end
 end

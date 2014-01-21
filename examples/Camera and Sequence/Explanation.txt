@@ -1,0 +1,22 @@
+Your target is to collect all gems. Number of remaining games are shown at top of screen. Collecting them all, triggers a cutscene showing exploding TNT.
+Press down standing near the console to see through security camera.
+
+In this example you learn how to group entities and make a sequence.
+Making a cutscene is easier with the Sequence class, but you have to know how to use it. Basically, it's array of hashes that define sequence of actions. Important note is that each action happen only ater the previous one was finished (you can use the :skip argument for single actions).
+Actions are named by symbols (couldn't figure how to make a pausable block) and are given values in hash arguments. (The alternative for symbols were just passing Procs, but it's more coding, isn't it?)
+Built-in action allow to make simple effects, like camera movement, shaking, flashing and creating trails etc. But user is able to define own actions, appropiate for his game.
+
+To add entity into group, you have first define your groups in specjal.rb line 167 (one is made as example). Just increment array indexes for each group and remember to match GROUPS variable from game.rb with number of defined groups.
+Then call init method with group names as arguments. This allows later to search for entity only in specific group (use $state.find(group_id)), so it's faster.
+
+Summary - This example shows how to:
+-add entity into a group
+-count entities in a group
+-search for specific entity
+-make a simple cutscene
+-make a camera with shader
+-setting default camera
+
+Files to look in:
+game.rb
+objects.rb

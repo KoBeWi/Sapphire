@@ -1,0 +1,19 @@
+An example about practical use of GUI. It's a bit complicated, but learned well, becomes user friendly.
+
+In the example, first click the button in lower-left corner of the screen. This will make a shape in upper-left corner. Just click it and a GUI window will appear. You may move it freely.
+Now play with some properties, move object around, change shape etc. When you're done, press Right Mouse Button to deselect object, disabling window. Now you can make another objects and change it's properties. Repeat infinitely :)
+Note that Radio selection and Textbox aren't shown in the example. The Radio is pretty the same as Dropdown and Textbox is also a part-object of Number input.
+
+So to begin with: set variable $enable_gui to true. This will make GUI objects appear and shows a cursor (custom one).
+All GUI graphics are in 'data/core' directory and they are: Check, Close, Cursor, Dropdown, Radio and Zip. Modify them as you wish. You may also configure your GUI in GUI.rb script. There you can set some colors etc.
+To make GUI object, just create it, like GUI::Check.new. Each object has different parameters, the first ones being x and y and then it may be array of choices for Dropdown or border values of Numeric input.
+The most complicated is GUI::Window class as it may contain other objects inside as well as some customisation. You initialize it with arguments: x, y, width, height, name and then the fun goes. Just put some arrays like shown in example and this will add objects to window, and they will follow it.
+All GUI elements and their constructors and properties are in Sapphire's Readme file.
+The last important thing is that you interract with GUI using .value method which will return value default for element (like bool when Button is pressed). This can also set the value.
+
+Summary - This example shows how to:
+-make a GUI
+-interact with GUI
+
+Files to look in:
+game.rb

@@ -1,0 +1,15 @@
+Captain Sapphire is on obstacle course.
+You can see here all of provided collision classes (colliders). They are:
+-collision box - for any type of rectangular collisions, including rotating rectangles
+-collision balls - for circular collision
+-collision group for multiple relatively-moving colliders
+To check for collisions, call collider.collides?(other colider).
+To interact with colliders, use set or move methods. Both of them take x, y and angle, but set forces the value, while move only increments it.
+Colliders are center-oriented, so e.g. position of rectangle is position of it's center. Collision group is used to move attached colliders relatively to their initial position. They will also rotate their position when changing angle.
+
+Summary - This example shows how to:
+-attach a collider
+-use it
+
+Files to look in:
+objects.rb

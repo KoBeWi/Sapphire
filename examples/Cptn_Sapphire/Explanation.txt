@@ -1,0 +1,19 @@
+This example is nothing more than a remake of Gosu's Cptn Ruby into Cptn Sapphire basing on my 'framework'.
+I left most of old code, changing some things so it uses my system. Most noticable change is that the map is made of image not a text file. Also, the camera moves in a nice smooth manner.
+This example is also a base for some other examples.
+
+Well, to sum up how to add your own entity. Just make some class and it mus have Entity inheritance (class Your_Class < Entity)
+Somewhere in initialize you should call init method (or even externally).
+After calling init, entity is automatically updated and drawn unless don't have such methods or have @stop or @invisible variables set true.
+
+Summary - This example shows how to:
+-make some map
+-add entities
+-make a player
+-set some boundary to camera and make it follow an entity
+-use some resources
+
+Files to look in:
+game.rb
+objects.rb
+map.rb

@@ -1,0 +1,13 @@
+In this example, you are a boat with cannon and your target is to kill as many birds as possible. Use arrows to steer, Left Mouse to shoot, Right for auto fire and Middle Mouse to switch weapons. Your weapon and kill count is on window caption.
+There are 3 types of projectiles built-in framework: trail, bullet and arrow. Everything about them is explained in Readme file of Sapphire.
+To add your own functionality, just modify Projectile class playing with arguments or even adding your own type.
+You also have to add your own logic (the way projectiles interact with enemies/player). There's a marked place for this.
+
+Summary - This example shows how to:
+-shoot different projectiles
+-make own projectile functionality
+-add projectile logic
+
+Files to look in:
+game.rb
+objects.rb

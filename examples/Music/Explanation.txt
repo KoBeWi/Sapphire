@@ -1,0 +1,14 @@
+This tiny example shows how the music funtions work.
+Most notable one is the intro feature. You can play a music with part that plays only once and then the rest of music is looping infinitely. The trick is that music must be split into two parts. But the system plays them pretty seamlessly.
+Normally you pay music by using Msc['some name'].play. To play with intro, make Msc['some name',true].play (you can't make ].play(true) as it will loop intro instead). The intro must be named same as rest of music with '-pre' suffix at the end.
+Alternatively, you can use :auto instead of true and it will automatically search if the music has an intro available.
+Rest of functions are Msc.Stop, Msc.Pause and Msc.Resume. They're available normally in Gosu, but using Gosu ones makes an danger of exception like when calling Song.current_song.stop with no song playing.
+Also, the Msc.Resume is same as Song.play, but will take care if there's any intro in action, so it won't be looped accidentally or the rest part will surely play in loop etc.
+
+Summary - This example shows how to:
+-play music
+-use music intro
+-use specjal music funtions
+
+Files to look in:
+game.rb

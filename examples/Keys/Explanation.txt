@@ -1,0 +1,26 @@
+An input example.
+Follow the instructions pressing proper keys. For the combo, you need to be quick.
+You can also redefine controls. But the name in Textbox MUST match the name of Gosu::Button constant or error will happen.
+
+So, to make some keyboard/mouse input, you can use provided Keypress class.
+The method Keypress[key] is pretty like window.button_down?, but with two differences.
+Instead of Gosu::Button as argument, you can use symbol (or any variable), which refers to key stored in hash (see below).
+The second difference is that you can pass false as second argument and the method will return true only in the frame (tick) the key was pressed, so it's like portable window.button_down(id).
+The additional methods of Keypress are:
+-Keys - return the keys hash to look up
+-Define (hash: keys) - call it passing hash of keys {:name => Gosu::Button} so it will work with Keypress
+-Set (name, key) - same as Define, but for single key
+-Any - return key last pressed
+
+There's also a Combo class. Constructor takes an integer for timeout and array of keys.
+Timeout is number of frames (tick) for Combo to reset. It's counting from last pressed key and is used to break sequence.
+The array may be either key names from hash or Gosu::Button. The combo returns true (accessed with Combo.trigger) when it's performed successfully.
+
+Summary - This example shows how to:
+-use Keypress for input and single pressing
+-make a Combo
+-define controls
+
+Files to look in:
+game.rb
+Keys.rb (line 26)

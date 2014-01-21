@@ -1,0 +1,15 @@
+Just example how to make simple effects. Hold 1 to make particles, press 2-4 to make trail, 5-6 to shake and 7-8 to flash.
+Trace, Trail and Particle are simple effect classes. Basically they need: x, y, z and image.
+Sapphire image format for some objects is either 'image name' or ['image name', size_x, size_y, frame] for tiles.
+Trace takes also speed of effect, Trail speed of animation and Particle needs vx and vy. For other properties, see Readme.
+Flash and shake are effects called from Game class. Flash takes color and speed of effect and optional 2-phase flash (bool). Shake needs osscilation value, time per shake and number of shakes.
+
+Summary - This example shows how to:
+-make trail
+-make trace
+-make particle
+-flash
+-shake
+
+Files to look in:
+game.rb

@@ -1,0 +1,10 @@
+This veery small example, shows how to play sound at given position in space (like 3D sound, but 2D).
+The closer you are to the source (gem), sound is louder. When you move away, sound gets more quiet and may play either from left or right speaker depending on your position.
+To achieve the effect, just use $state.play(sample_name, x, y, range). Range is optional (defaultly double width of window) and represents the biggest distance you can hear the sound. Further, you won't hear it even with your speakers at max volume. The distance is calculated not only from horizontal position, but also vertical.
+The volume is calculated basing on $state's current camera position.
+
+Summary - This example shows how to:
+-play sound at given position
+
+Files to look in:
+objects.rb

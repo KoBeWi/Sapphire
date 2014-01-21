@@ -1,0 +1,23 @@
+Our Cptn Sapphire has been thrown into a dark marble dungeon!
+This example shows the use of lighting system.
+To use lights, set @lighting_enabled variable in Game to true. This will automatically blackout the screen.
+Now, you have to make a Light entity.
+
+Light constructor takes 3 to 5 arguments:
+x
+y
+radius - radius of light in pixels ; all lights are circular ; actual radius may be smaller, because the lighting is smooth
+color (default: white) - color of light ; light draws in additive mode so white surface in red light is red, but white light replaces red light etc.
+luminance (default: 1) - value from 1 to 8 ; defines the power of light ; light with luminance 8 will not be smooth, but solid
+
+All the atributes have accessors, so you can modify them dynamically.
+
+Summary - This example shows how to:
+-make darkness
+-make lightness
+-make a light follow entity
+-make dynamic lights with changing properties
+
+Files to look in:
+game.rb
+objects.rb

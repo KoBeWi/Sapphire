@@ -10,8 +10,8 @@ include Gosu
 puts "Gosu #{Gosu::VERSION}"
 require 'ashton'
 puts "Ashton 0.0.3alpha"
-require 'texplay'
-puts "Texplay #{TexPlay::VERSION}"
+# require 'texplay' #disabled because of loading slowdowns
+# puts "Texplay #{TexPlay::VERSION}"
 include Gl
 include Glu
 puts "Opengl-0.8.0.pre1"
@@ -25,15 +25,18 @@ if rq.split[0]==Dir.getwd+'/'+'!scite'
   `#{$path}scite/scite.exe`
 elsif rq.split[0]==Dir.getwd+'/'+'!help'
   `notepad #{$path}README.md`
+elsif rq.split[0]==Dir.getwd+'/'+'!examples'
+  FileUtils.cp($path+'Examples.zip',Dir.getwd)
 elsif rq.split[0]==Dir.getwd+'/'+'!template'
-  name='Template' ; name=rq.split(' ')[1] if rq.split(' ')[1] and rq.split(' ')[1] != '!require'
+  name='Template' ; name=rq.split(' ')[1] if rq.split(' ')[1]
   Dir.mkdir("#{name}")
   Dir.mkdir("#{name}/data")
   Dir.mkdir("#{name}/data/scripts")
   Dir.mkdir("#{name}/data/gfx")
   Dir.mkdir("#{name}/data/sfx")
   Dir.mkdir("#{name}/data/music")
-  Dir.mkdir("#{name}/data/GUI")
+  Dir.mkdir("#{name}/data/core")
+  Dir.mkdir("#{name}/data/fades")
   
   f1=File.new(name+'/'+name+'.rb','w')
   f2=File.open($path+"data/main.rb",'r')
@@ -65,7 +68,7 @@ elsif rq.split[0]==Dir.getwd+'/'+'!template'
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
-  ['Check.png','Close.png','Cursor.png','Dropdown.png','Radio.png','Zip.png'].each{|img| FileUtils.cp($path+'data/GUI/'+img,name+'/data/GUI/'+img)}
+  ['Check.png','Close.png','Cursor.png','Dropdown.png','Radio.png','Zip.png','Dark.png','Light.png','fader.frag'].each{|img| FileUtils.cp($path+'data/core/'+img,name+'/data/core/'+img)}
   
   puts 'Szablon utworzony'
   gets
@@ -84,4 +87,3 @@ rescue Exception => e
     gets
   end
 end
-#Code_Requiristier.new

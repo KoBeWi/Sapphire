@@ -1,1 +1,1 @@
-ocra Sapphire.rb --icon Sapphire.ico scite/** data/** README data/GUI/Cursor.png data/GUI/Close.png data/GUI/Dropdown.png data/GUI/Radio.png data/GUI/Check.png data/GUI/Zip.png
+ocra Sapphire.rb --icon Sapphire.ico scite/** data/** README.md data/core/Cursor.png data/core/Close.png data/core/Dropdown.png data/core/Radio.png data/core/Check.png data/core/Zip.png data/core/Light.png data/core/Dark.png data/core/fader.frag examples.zip

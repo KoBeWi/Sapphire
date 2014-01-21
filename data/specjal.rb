@@ -35,6 +35,10 @@ class Keypress
   def Keypress.Any
     @@pressing[1].last
   end
+  
+  def Keypress.Keys
+    @@keys
+  end
 end
 
 class Img
@@ -107,6 +111,19 @@ class Msc
 	def Msc.reset
 		@@music.clear if defined?(@@music)
 	end
+
+  def Msc.Stop
+    Song.current_song.stop if Song.current_song
+    $premusic=nil
+  end
+
+  def Msc.Pause
+    Song.current_song.pause if Song.current_song
+  end
+
+  def Msc.Resume
+    Song.current_song.play($premusic[0] != Song.current_song) if Song.current_song
+  end
 end
 
 class Fnt
@@ -168,6 +185,7 @@ class Entity
     #define additional groups like above
     
     @spawn_time=$time
+    @removed=false
 	end
 
 	def remove
@@ -184,9 +202,4 @@ class Entity
 			(-@vy).to_i.times{if !$state.solid?(@x,@y,true) and !$state.solid?(@x+width,@y,true) ; @y-=1 else @vy=0 end}
 		end
 	end
-end
-
-def Stop_Music
-  Song.current_song.stop if Song.current_song
-  $premusic=nil
 end
