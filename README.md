@@ -60,10 +60,10 @@ Code files: (number is for class index below)
 - game.rb  // 7
     File for main game's state. Manages entities etc.
 
-- utility&fx.rb  // 8,9,10,11,12,13,14,15,16,17,18,19,20,21
+- utility&fx.rb  // 8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
     Tools for easy advanced entity control and classes taking care of simple effects, like particles etc. Also some collision classes
     
-  objects.rb // 22
+  objects.rb // 23
     You can put your objects here
 
 - GUI
@@ -116,8 +116,19 @@ Loads specified resoure and saves in memory for re-use
   Use: Img['space'] so it will load 'space.png' from 'data/gfx' etc.
   name - path to resource
   tileable - used only for Img, true if image has to be tileable
-  pre - apply prelude to music. It will be played at the beginning and then the actual music is looped. Prelude must be separate file named '(music_name)-pre'. Using :auto will seek automatically if there's prelude available
+  pre - apply intro to music. It will be played at the beginning and then the actual music is looped. Intro must be separate file named '(music_name)-pre'. Using :auto will seek automatically if there's intro available
   Images need to be .png , music and sound .ogg
+  
+for Msc
+
+  def Msc.Stop
+  Stops any music playing making sure you won't cause an exception
+  
+  def Msc.Pause
+  Pauses any music
+  
+  def Msc.Resume
+  Resumes paused music, taking care of any intros, so it will loop right
 
 4.Tls
 Loads tiles from image
@@ -382,7 +393,47 @@ To use with game's lighting effects ; creates light on its position with given p
 
   def intialize(x,y,radius,color,luminance)
   
-21.Projectile
+21.Sequence
+see: utility&fx.rb 497 to customize and add own actions
+Class used to perform scheduled actions. Each next action will take place only if previous one was finished.
+
+  def initialize(sequence)
+  sequence - array of actions ; each action is an hash, each requires :type key. The types and their arguments (additional keys) are following:
+    :wait - waits given time before next action
+      :time (REQUIRED) - number of frames (ticks) to wait
+    
+    :camera_move - moves camera to given positions
+      :target (REQUIRED) - 3 element array: [target_x, target_y, speed]
+      
+    :camera_follow - follows target
+      :target (REQUIRED) - this entity will be followed
+      :smooth - if following should be smooth
+      
+    :flash - makes flash effect
+      :values (REQUIRED) - arguments to effect (see: 7.Game.flash)
+      
+    :shake - makes shake effect
+      :values (REQUIRED) - arguments to effect (see: 7.Game.shake
+      
+    :trail - crates Trail Entity
+      :values (REQUIRED) - arguments to constructor (see: 13.Trail)
+      
+    :trace/:particle - same as :trail
+    
+    :sample - plays a sound
+      :name (REQUIRED) - path/name of the sample
+      
+    :entity - creates entity of given class
+      :class (REQUIRED) - symbol representing name of the class to create
+      :values (REQUIRED) - arguments to constructor, depending on class you chose
+      
+    :fade_in/:fade_out - makes a fade effect
+      :effect (REQUIRED) - name of the effect
+      :speed (REQUIRED) -speed of the effect
+      :mode  - solid mode (see: 7.Game.fade_in/out)
+      
+  
+22.Projectile
 see: objects.rb to customize
 Template class for projetiles. Includes functions like moving, homing, falling etc. but you have to define yourself how does this interact with other objects
 
