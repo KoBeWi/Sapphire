@@ -1,9 +1,3 @@
-========================================================
-WARNING!
-THIS IS A COMPLETELY RUSHED RELEASE THAT NEEDS CLEANING.
-COMMITING IT ON DEMAND, LOL
-========================================================
-
 Sapphire (source version) 
 
 The 'source' includes:
