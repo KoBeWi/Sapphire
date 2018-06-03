@@ -4,20 +4,17 @@ $path=str.join('/')
 $path=$path+(if $path != '' then '/' else Dir.getwd+'/' end)
 
 puts "-"*37
-puts "Ruby 1.9.2"
+puts "Ruby #{RUBY_VERSION}"
 require 'gosu'
 include Gosu
 puts "Gosu #{Gosu::VERSION}"
 require 'ashton'
-puts "Ashton 0.0.3alpha"
-# require 'texplay' #disabled because of loading slowdowns
-# puts "Texplay #{TexPlay::VERSION}"
-include Gl
-include Glu
-puts "Opengl-0.8.0.pre1"
+puts "Ashton #{Ashton::VERSION}"
+require 'chipmunk'
+puts "Chipmunk 6.1.3.4"
 require 'fileutils'
 
-class Code_Requiristier
+begin
 rq=if ARGV[0] then ARGV[0] else puts "-"*37 ; puts "Type program to run (or !help):"
 Dir.getwd+'/'+gets.chomp end
 puts "-"*37
@@ -36,6 +33,7 @@ elsif rq.split[0]==Dir.getwd+'/'+'!template'
   Dir.mkdir("#{name}/data/sfx")
   Dir.mkdir("#{name}/data/music")
   Dir.mkdir("#{name}/data/core")
+  Dir.mkdir("#{name}/data/core/GUI")
   Dir.mkdir("#{name}/data/fades")
   
   f1=File.new(name+'/'+name+'.rb','w')
@@ -43,18 +41,13 @@ elsif rq.split[0]==Dir.getwd+'/'+'!template'
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
-  f1=File.new(name+'/data/scripts/'+'specjal.rb','w')
-  f2=File.open($path+'data/specjal.rb','r')
+  f1=File.new(name+'/data/core/'+'core.rb','w')
+  f2=File.open($path+'data/core/core.rb','r')
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
-  f1=File.new(name+'/data/scripts/'+'utility&fx.rb','w')
-  f2=File.open($path+'data/utility&fx.rb','r')
-  f1.puts(f2.readlines.join)
-  f1.close ; f2.close
-  
-  f1=File.new(name+'/data/scripts/'+'game.rb','w')
-  f2=File.open($path+'data/game.rb','r')
+  f1=File.new(name+'/data/scripts/'+'system.rb','w')
+  f2=File.open($path+'data/system.rb','r')
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
@@ -63,14 +56,29 @@ elsif rq.split[0]==Dir.getwd+'/'+'!template'
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
+  f1=File.new(name+'/data/scripts/'+'utility.rb','w')
+  f2=File.open($path+'data/utility.rb','r')
+  f1.puts(f2.readlines.join)
+  f1.close ; f2.close
+  
+  f1=File.new(name+'/data/scripts/'+'fx.rb','w')
+  f2=File.open($path+'data/fx.rb','r')
+  f1.puts(f2.readlines.join)
+  f1.close ; f2.close
+  
+  f1=File.new(name+'/data/scripts/'+'game.rb','w')
+  f2=File.open($path+'data/game.rb','r')
+  f1.puts(f2.readlines.join)
+  f1.close ; f2.close
+  
   f1=File.new(name+'/data/scripts/'+'objects.rb','w')
   f2=File.open($path+'data/objects.rb','r')
   f1.puts(f2.readlines.join)
   f1.close ; f2.close
   
-  ['Check.png','Close.png','Cursor.png','Dropdown.png','Radio.png','Zip.png','Dark.png','Light.png','fader.frag'].each{|img| FileUtils.cp($path+'data/core/'+img,name+'/data/core/'+img)}
+  ['GUI/Close.png','GUI/Cursor.png','GUI/Radio.png','Dark.png','Light.png','fader.frag','light.frag'].each{|img| FileUtils.cp($path+'data/core/'+img,name+'/data/core/'+img)}
   
-  puts 'Szablon utworzony'
+  puts 'Template created'
   gets
 else
     ARGV.clear

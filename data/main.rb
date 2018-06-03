@@ -1,21 +1,17 @@
-#POWERDED BY SAPPHIRE V.1.8
+#POWERDED BY SAPPHIRE V.1.11
+USE_ASHTON = true
+USE_CHIPMUNK = true
+
+begin
 
 require 'gosu'
 include Gosu
-#remove some of these if you don't use EXE and don't want/can't use them
-require 'ashton'
-# require 'texplay' #uncomment if needed ; required for this unused GUI feature (check GUI.rb for more details)
-require 'gl'
-require 'glu'
-include Gl
-include Glu
+require 'ashton' if USE_ASHTON
+require 'chipmunk' if USE_CHIPMUNK
 
-require_relative 'data/scripts/specjal.rb' #require specjal.rb first, because it's so important
-donotload=['specjal.rb']
-scripts=Dir.entries('data/scripts')-(['.','..']+donotload)
+require_relative 'data/core/core.rb'
+scripts=Dir.entries('data/scripts')-['.','..']
 scripts.each{|scr| require_relative 'data/scripts/'+scr}
-
-FONT=default_font_name #default font, remove if you won't use it
 
 class Main < Window
   attr_reader :faded,:fade
@@ -23,42 +19,41 @@ class Main < Window
     super(640, 480, fullscreen) #set resolution and fullscreen mode
     self.caption="Title" #set window caption
     $time=0
-    Keypress.Define :left=>KbLeft, :right=>KbRight, :jump=>KbSpace #define input to use with Keypress[] method
     
-    @fader=Ashton::Shader.new(fragment: 'data/core/fader.frag')
     @solid=false
   end
 
   def update
-    GUI::System.Update if $enable_gui
+    $sapphire_system.update
     $state.update
     $time+=1
-    
-    Keypress.Clean
-    
-    Msc[$premusic[1]].play(true) if $premusic and !$premusic[0].playing? and !$premusic[0].paused?
   end
 
   def draw
+    @fader = Ashton::Shader.new(fragment: 'data/core/fader.frag') if !@fader and USE_ASHTON
     return if @faded
     $state.draw
-    GUI::System.Draw if $enable_gui
+    $sapphire_system.draw
     
     if @fade
       flush
       @fade[3]-=(@fade[2] ? @fade[1] : -@fade[1])
       @fader.Value=@fade[3]*0.001
       Img["fades/#{@fade[0]}"].draw(0,0,0,:shader=>@fader)
+      if @fade[2] and @fade[3]<=0
+        @fade=nil
+        @faded=true
+      end
     end
   end
   
   def button_down(id)
-    Keypress.Push(id)
+    $sapphire_system.button_down=id
     $state.button_down(id) if $state.respond_to?(:button_down)
   end
   
   def button_up(id)
-    Keypress.Remove(id)
+    $sapphire_system.button_up=id
     $state.button_up(id) if $state.respond_to?(:button_up)
   end
   
@@ -84,6 +79,12 @@ class Main < Window
 end
 
 $screen=Main.new
-GUI::System.Init
-$state=Game.new
+$state=Load.new
 $screen.show
+
+rescue Exception => e
+f=File.new('crash log.txt','w')
+f.puts e
+f.puts e.backtrace
+f.close
+end

@@ -1,10 +1,11 @@
 class Projectile < Entity
   Z=2 #default z-order of projectile
+  #comments show how to use specific hash argument
   
   def initialize(x,y,type,img,args={})
     @x,@y,@type,@img,@args=x,y,type,img,args
     if @args[:animation]
-      @animation=@args[:animation]+[0,0] #frames, time
+      @animation=@args[:animation]+[0,0] #[frames, time per frame]
     end
     
     @time=0
@@ -30,7 +31,7 @@ class Projectile < Entity
       @x+=offset_x(@args[:dir],@args[:speed] ? @args[:speed] : 1)
       @y+=offset_y(@args[:dir],@args[:speed] ? @args[:speed] : 1)
       
-      if @args[:follow] #target entity, entity offset x, entity offset y, bullet offset x, bullet offset y
+      if @args[:follow] #[target entity, entity offset x, entity offset y, bullet offset x, bullet offset y]
         x=@args[:follow][0].x+(@args[:follow][1] ? @args[:follow][1] : 0)
         y=@args[:follow][0].y+(@args[:follow][2] ? @args[:follow][2] : 0)
         angle=angle(@x+(@args[:follow][3] ? @args[:follow][3] : 0),@y+(@args[:follow][4] ? @args[:follow][4] : 0),x,y)
@@ -85,8 +86,8 @@ class Projectile < Entity
     
     @args[:angle]||=0 if @args[:rotate]
     @args[:angle]+=@args[:rotate] if @args[:rotate]
-    img=(@img.class == Array ? Tls[@img[0], @img[1], @img[2]][@img[3]] : Img[@img])
-    size=[img.width,img.height] #you can change it
+    img=(@img.class == Array ? tls(@img[0], @img[1], @img[2])[@img[3]] : img(@img))
+    size=[img.width,img.height] #can be changed for custom one
     if @args[:angle]
       img.draw_rot(@x+size[0]/2,@y+size[1]/2,@args[:z] ? @args[:z] : Z,@args[:angle],0.5,0.5,@args[:scalex] ? @args[:scalex] : 1,@args[:scaley] ? @args[:scaley] : 1,@args[:color] ? @args[:color] : 0xffffffff)
     else
